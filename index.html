@@ -32,7 +32,7 @@
   --d256:#7F8791; --d256s:#E2E5E8;
   --d512:#3F454D; --d512s:#D2D6DB;
   --you:#E77500; --yous:color-mix(in srgb, var(--you) 16%, var(--paper));
-  --nvidia:#76B900; --amd:#ED1C24;
+  --nvidia:#76B900; --amd:#ED1C24; --clear:#F7B6D2;
   --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --sign:"Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -97,8 +97,9 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .step-t{display:block; margin:.1rem 0 .4rem; font-weight:600; font-size:.95rem}
 .mem-kind{margin-top:0}
 .mem-hint{margin:.4rem 0 0; font-size:.82rem; color:var(--ink-soft)}
-.preset-label{margin:.6rem 0 0; font-size:.82rem; color:var(--ink-soft)}
-.preset-label + .presets{margin-top:.3rem}
+.preset-label{display:block; margin:.6rem 0 0; font-size:.82rem; color:var(--ink-soft)}
+.step-t + .preset-label{margin-top:0}
+.preset-label + .presets,.preset-label + .ram{margin-top:.3rem}
 .has-tip{position:relative}
 .info{width:1.15rem; height:1.15rem; margin-left:.3rem; padding:0; border-radius:50%; border:1px solid var(--ink-soft); background:none; color:var(--ink-soft);
   font:700 .72rem/1 var(--mono); cursor:help; vertical-align:1px}
@@ -118,6 +119,10 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .go{display:inline-grid; place-items:center; width:2.4rem; height:2.4rem; padding:0; border-radius:8px; border:2px solid var(--ink); background:var(--hazard); color:var(--hazard-ink); cursor:pointer}
 .go:hover:not(:disabled){background:var(--ink); color:var(--hazard)}
 .go:disabled{opacity:.4; cursor:not-allowed}
+.clear{height:2.4rem; padding:0 .8rem; border-radius:8px; border:2px solid var(--ink); background:var(--clear); color:var(--hazard-ink); font:700 .85rem var(--mono); cursor:pointer}
+.clear:hover:not(:disabled){background:var(--ink); color:var(--clear)}
+.clear:focus-visible{outline:3px solid var(--q4); outline-offset:2px}
+.clear:disabled{opacity:.4; cursor:not-allowed}
 .go:focus-visible,.presets button:focus-visible{outline:3px solid var(--q4); outline-offset:2px}
 .presets{display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.6rem}
 .presets button{font:600 .8rem var(--mono); padding:.25rem .55rem; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center}
@@ -205,6 +210,8 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .aside b{font-style:normal; font-weight:600; color:var(--ink)}
 .dc{font-size:.74rem; color:var(--ink-soft)}
 .dc b{font-family:var(--mono); color:var(--ink)}
+.dc a{color:inherit; text-decoration:underline dotted; text-underline-offset:2px}
+.dc a:hover{color:var(--ink); text-decoration-style:solid}
 .ok{background:var(--ok-soft)} .meh{background:var(--warn-soft)} .no{background:var(--no-soft); color:var(--ink-soft)}
 .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.3rem}
 .claude{font-size:.88rem; font-weight:600; border-left:2px solid var(--line); padding-left:.8rem}
@@ -231,19 +238,27 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 @media (prefers-reduced-motion: reduce){.indicator{transition:none}}
 
 /* notes */
-.notes{margin-top:2.5rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem}
+.notes{margin-top:2.5rem; display:grid; grid-template-columns:repeat(4,1fr); gap:1rem}
 .notes .box p{margin:0; font-size:.92rem; color:var(--ink-soft)}
-.notes .wide{grid-column:1 / -1}
+.notes .box p + p{margin-top:.5rem}
+/* Second row sits in the middle two of four columns */
+.notes .row2-a{grid-column:2}
+.notes .row2-b{grid-column:3}
+.notes .box[hidden]{display:none}
+.notes a{color:var(--ink)}
+.notes b{color:var(--ink); font-weight:600}
 code{font-family:var(--mono); font-size:.85em; background:var(--no-soft); padding:.05rem .3rem; border-radius:4px}
 footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:center}
 
 @media (max-width:900px){
+  .notes{grid-template-columns:repeat(2,1fr)} .notes .row2-a,.notes .row2-b{grid-column:auto}
   .level{grid-template-columns:90px 1fr; grid-template-areas:"size models" "mem mem" "claude claude"}
   .size{grid-area:size} .models{grid-area:models} .mem{grid-area:mem} .claude{grid-area:claude; border-left:0; padding-left:0; border-top:1px solid var(--line); padding-top:.5rem}
   .hero{grid-template-columns:1fr} .dial{justify-self:start}
   .tools{grid-template-columns:1fr}
 }
 @media (max-width:520px){
+  .notes{grid-template-columns:1fr}
   .shaft{padding-left:46px} .shaft::before{width:30px} .shaft::after{left:8px; width:14px}
   .car{left:3px; width:24px; height:33px} .cable{left:14px}
   .level .plate{left:-46px; width:28px; height:28px; font-size:.7rem}
@@ -303,14 +318,16 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       <li>
         <span class="step-n" aria-hidden="true">2</span>
         <div>
-          <label class="step-t" for="ram" id="ramLabel">How much unified memory?</label>
+          <p class="step-t" id="ramLabel">How much unified memory?</p>
+          <p class="preset-label" id="presetLabel">Pick a 🍎 Mac</p>
+          <div class="presets" id="presets" role="group" aria-labelledby="presetLabel"></div>
+          <label class="preset-label" for="ram">…or type your own</label>
           <div class="ram">
-            <input id="ram" type="number" inputmode="numeric" min="4" max="1024" step="4" placeholder="e.g. 48">
+            <input id="ram" type="number" autocomplete="off" inputmode="numeric" min="4" max="1024" step="4" placeholder="e.g. 48">
             <span class="unit">GB</span>
             <button type="button" class="go" id="go" disabled aria-label="Take me there" title="Take me there!"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="clear" id="clear" disabled>Clear</button>
           </div>
-          <p class="preset-label" id="presetLabel">…or pick a 🍎 Mac</p>
-          <div class="presets" id="presets" role="group" aria-labelledby="presetLabel"></div>
         </div>
       </li>
     </ol>
@@ -336,10 +353,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 <section class="notes" aria-label="How to read this">
   <div class="box"><h2>Rule of thumb</h2><p>4-bit takes about 0.6GB per billion parameters; 8-bit about 1.1GB. Those figures cover weights only, so leave room for context and the OS.</p></div>
   <div class="box"><h2>Mixture-of-experts</h2><p>An MoE model needs memory for all its parameters but runs at the speed of the few active per token. That’s why most big models today are MoE.</p></div>
-  <div class="box"><h2>The macOS memory cap</h2><p>macOS lets the GPU use roughly two-thirds to three-quarters of unified memory by default. You can raise it with <code>sudo sysctl iogpu.wired_limit_mb=…</code>.</p></div>
-  <div class="box"><h2>Data center GPUs</h2><p>The 🏢 line counts 80GB H100s (A100s are the same size) and ~180GB B200s needed to hold 8-bit (FP8) weights, using 90% of each card. Real deployments round up to 2, 4, or 8 GPUs per server and want spare memory for long contexts and many users.</p></div>
+  <div class="box"><h2>Data center GPUs</h2><p>The 🏢 line counts 80GB <a href="https://en.wikipedia.org/wiki/Hopper_(microarchitecture)" target="_blank" rel="noopener">H100s</a> (<a href="https://en.wikipedia.org/wiki/Ampere_(microarchitecture)" target="_blank" rel="noopener">A100s</a> are the same size) and ~180GB <a href="https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)" target="_blank" rel="noopener">B200s</a> needed to hold 8-bit (FP8) weights, using 90% of each card. Real deployments round up to 2, 4, or 8 GPUs per server and want spare memory for long contexts and many users.</p></div>
   <div class="box"><h2>Comparable Claude model</h2><p>Names the Claude model you’d reach for to do the same kind of task. It isn’t a claim of equal performance; open models still trail on harder versions of these tasks.</p></div>
-  <div class="box wide"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
+  <div class="box row2-a" id="capUnified"><h2>Shared-memory caps</h2><p><b>Mac:</b> the GPU gets roughly two-thirds to three-quarters by default. Raise it with <code>sudo sysctl iogpu.wired_limit_mb=…</code>.</p><p><b>Strix Halo:</b> set the GPU’s share in the BIOS or AMD’s Variable Graphics Memory (up to 96GB of 128GB on Windows; Linux goes higher via the amdgpu GTT limit).</p><p><b>DGX Spark:</b> no fixed split; the GPU can use whatever the OS isn’t.</p></div>
+  <div class="box row2-a" id="capVram" hidden><h2>The VRAM wall</h2><p>There’s no cap to raise: VRAM is whatever is soldered onto the card. The driver and your display take roughly 0.5–1.5GB, which is why we count 90%. Plugging your monitor into integrated graphics frees a little more. Past that, you need a second card or offloading to system RAM, which is much slower.</p></div>
+  <div class="box row2-b"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
 </section>
 
 <footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.</footer>
@@ -410,8 +428,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   {"short": "RTX 5090", "vendor": "nvidia", "vram": 32}
  ],
  "datacenter": [
-  {"short": "H100", "vram": 80},
-  {"short": "B200", "vram": 180}
+  {"short": "H100", "vram": 80, "url": "https://en.wikipedia.org/wiki/Hopper_(microarchitecture)"},
+  {"short": "B200", "vram": 180, "url": "https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)"}
  ],
  "appsReserveGB": 16,
  "contextReserveGB": 4,
@@ -870,7 +888,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       mem = `<div class="mem"><div class="fits"><span class="no">Weights not available</span></div></div>`;
     } else {
       const a = smallest(l.q4), b = smallest(l.q8);
-      const dc = D.datacenter.map(g => `<b>${Math.ceil(l.q8 / (g.vram * VRAM_USABLE))}×</b> ${esc(g.short)}`).join(" · ");
+      const dc = D.datacenter.map(g => `<b>${Math.ceil(l.q8 / (g.vram * VRAM_USABLE))}×</b> <a href="${g.url}" target="_blank" rel="noopener">${esc(g.short)}</a>`).join(" · ");
       mem = `<div class="mem" aria-label="Memory needs">${bar("q4", l.q4, l.q4Label)}${bar("q8", l.q8, l.q8Label)}<div class="fits"><span class="${a.cls}">Q4: ${a.text}</span><span class="${b.cls}">Q8: ${b.text}</span></div><div class="dc"><span aria-hidden="true">🏢</span> Data center, 8-bit: ${dc}</div></div>`;
     }
     html += `<article class="level${l.restricted ? " restricted" : ""}" id="${lvl(i).toLowerCase()}" data-level="${lvl(i)}" data-size="${esc(l.size)}" data-gem="${l.gem ? esc(l.gem.name) : ""}">
@@ -886,17 +904,17 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   $("shaft").innerHTML = html;
 
   // Your own stop
-  const ramIn = $("ram"), ramOut = $("ramOut"), go = $("go"), presets = $("presets");
+  const ramIn = $("ram"), ramOut = $("ramOut"), go = $("go"), clear = $("clear"), presets = $("presets");
   const memKind = $("memKind"), memHint = $("memHint"), ramLabel = $("ramLabel"), presetLabel = $("presetLabel");
   const KINDS = {
     unified: {
-      label:"How much unified memory?", noun:"of unified memory", presetLabel:"…or pick a 🍎 Mac",
+      label:"How much unified memory?", noun:"of unified memory", presetLabel:"Pick a 🍎 Mac",
       hint:"The CPU and GPU share one pool: Apple Silicon Macs, AMD Strix Halo, NVIDIA DGX Spark.",
       presets:() => D.devices.map(d => `<button type="button" data-ram="${d.ram}" aria-pressed="false"><i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}</button>`)
     },
     vram: {
       label:"How much VRAM?", noun:"of VRAM",
-      presetLabel:`…or pick a 🎮 gaming GPU <span class="vendor-key">(<i class="dot nvidia" aria-hidden="true"></i>NVIDIA <i class="dot amd" aria-hidden="true"></i>AMD)</span>`,
+      presetLabel:`Pick a 🎮 gaming GPU <span class="vendor-key">(<i class="dot nvidia" aria-hidden="true"></i>NVIDIA <i class="dot amd" aria-hidden="true"></i>AMD)</span>`,
       hint:"A separate graphics card; with several, add them up. Assumes the whole model fits on the GPU, with no offloading to system RAM.",
       presets:() => D.gpus.map(g => `<button type="button" data-ram="${g.vram}" data-vendor="${g.vendor}" aria-pressed="false"><i class="dot ${g.vendor}" aria-hidden="true"></i>${esc(g.short)}&nbsp;<small>${g.vram}GB</small></button>`)
     }
@@ -909,6 +927,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     memHint.textContent = KINDS[k].hint;
     presetLabel.innerHTML = KINDS[k].presetLabel;
     presets.innerHTML = KINDS[k].presets().join("");
+    $("capUnified").hidden = k !== "unified";
+    $("capVram").hidden = k !== "vram";
     updateYou();
   }
   const kindInfo = $("kindInfo");
@@ -948,6 +968,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     presets.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === picked ? "true" : "false"));
     document.documentElement.dataset.rider = picked?.dataset.vendor || "mac";
     go.disabled = true;
+    clear.disabled = !ramIn.value;
     document.querySelectorAll(".you-slot").forEach(s => s.innerHTML = "");
     setYouFloor(-1);
     const ram = parseFloat(ramIn.value);
@@ -965,7 +986,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     setYouFloor(i);
   }
   ramIn.addEventListener("input", () => updateYou());
-  setKind("unified");
+  clear.addEventListener("click", () => { ramIn.value = ""; updateYou(); ramIn.focus(); });
+  ramIn.addEventListener("keydown", e => { if (e.key === "Enter" && !go.disabled) go.click(); });
+  function reset(){ ramIn.value = ""; setKind("unified"); }
+  addEventListener("pageshow", e => { if (e.persisted) reset(); });
+  reset();
 
   // Floor indicator
   const ind = $("indicator"), indLevel = $("indLevel"), indSub = $("indSub");
