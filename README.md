@@ -24,6 +24,7 @@ splitting, MoE experts on CPU) is out of scope.
 |---|---|
 | **Q4 / Q8 memory** | Approximate weight footprint at 4-bit and 8-bit quantization |
 | **Models** | Notable open-weight releases from the past year at that size, linked to Hugging Face |
+| **🏢 Data center** | How many 80GB H100s or ~180GB B200s hold the 8-bit (FP8) weights, at 90% usable per card |
 | **Comparable Claude model** | The Claude tier you'd reach for on the same kind of task (not a claim of equal performance) |
 | **Popularity** | A rough three-step signal from OpenRouter token usage and Hugging Face downloads |
 
