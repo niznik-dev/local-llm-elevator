@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How deep can your Mac go? Local LLMs by memory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#E4E6E8;
+  --paper:#F6F7F8;
+  --ink:#1B2025;
+  --ink-soft:#56606B;
+  --line:#C9CED4;
+  --shaft:#2A3036;
+  --cable:#8A939C;
+  --hazard:#F28A1E;
+  --hazard-ink:#1B2025;
+  --panel:#14171A;
+  --amber:#FF9F3A;
+  --amber-dim:#5A4218;
+  --ok:#2E9D6A; --ok-soft:#DDF1E7;
+  --warn:#C98A00; --warn-soft:#FBF0D2;
+  --no-soft:#E8EAED;
+  --q4:#3A86C8; --q8:#1E4E7A;
+  --d32:#E0559A; --d32s:#FBE3EF;
+  --d64:#E8674F; --d64s:#FCE6E1;
+  --d128:#B9BFC7; --d128s:#F1F2F4;
+  --d256:#7F8791; --d256s:#E2E5E8;
+  --d512:#3F454D; --d512s:#D2D6DB;
+  --you:#2E9D6A; --yous:#DDF1E7;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sign:"Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#101316; --paper:#191D21; --ink:#E6E9EC; --ink-soft:#9AA4AE; --line:#2B3137;
+    --shaft:#0B0D0F; --cable:#4A525A;
+    --ok-soft:#173528; --warn-soft:#3A2E10; --no-soft:#22272C;
+    --q4:#5FA6E3; --q8:#9CC6EE;
+    --d32:#FF7EB9; --d32s:#43213A; --d64:#FF8A72; --d64s:#45261F;
+    --d128:#E2E5E9; --d128s:#2C3137; --d256:#9AA1AB; --d256s:#262A30; --d512:#5D646D; --d512s:#1E2227;
+    --you:#4CC48D; --yous:#173528;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#101316; --paper:#191D21; --ink:#E6E9EC; --ink-soft:#9AA4AE; --line:#2B3137;
+  --shaft:#0B0D0F; --cable:#4A525A;
+  --ok-soft:#173528; --warn-soft:#3A2E10; --no-soft:#22272C;
+  --q4:#5FA6E3; --q8:#9CC6EE;
+  --d32:#FF7EB9; --d32s:#43213A; --d64:#FF8A72; --d64s:#45261F;
+  --d128:#E2E5E9; --d128s:#2C3137; --d256:#9AA1AB; --d256s:#262A30; --d512:#5D646D; --d512s:#1E2227;
+  --you:#4CC48D; --yous:#173528;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55}
+.wrap{max-width:1100px; margin:0 auto; padding:2.5rem 1.25rem 5rem}
+
+/* ---------- hero ---------- */
+.hero{display:grid; grid-template-columns:1fr auto; gap:2rem; align-items:end; padding-bottom:1.6rem; border-bottom:6px solid var(--ink); position:relative}
+.hero::after{content:""; position:absolute; left:0; right:0; bottom:-18px; height:10px;
+  background:repeating-linear-gradient(-45deg, var(--hazard) 0 14px, var(--hazard-ink) 14px 28px)}
+.kicker{font-family:var(--sign); font-weight:700; font-size:1.05rem; letter-spacing:.08em; color:var(--ink-soft); margin:0 0 .3rem}
+h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem); line-height:.95; margin:0 0 .9rem; letter-spacing:-.005em}
+.lede{max-width:62ch; margin:0; color:var(--ink-soft); font-size:1.05rem}
+.updated{margin-top:.9rem; font-family:var(--mono); font-size:.85rem; color:var(--ink-soft)}
+.dial{background:var(--panel); border-radius:14px; padding:1rem 1.2rem; min-width:220px; border:3px solid #2E343A; box-shadow:inset 0 0 0 2px #000}
+.dial .lbl{font-family:var(--sign); font-weight:700; letter-spacing:.1em; color:#8C949C; font-size:.85rem}
+.dial .big{font-family:var(--mono); font-weight:600; color:var(--amber); font-size:2.6rem; line-height:1; text-shadow:0 0 12px rgba(255,159,58,.35)}
+.dial .arrows{display:flex; gap:.5rem; margin-top:.5rem; color:var(--amber-dim); font-size:1.1rem}
+.dial .arrows .on{color:var(--amber)}
+
+/* ---------- tools ---------- */
+.tools{display:grid; grid-template-columns:minmax(260px,360px) 1fr; gap:1rem; margin:2.6rem 0 2rem}
+.box{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem}
+.box h2{font-family:var(--sign); font-weight:700; font-size:1.25rem; margin:0 0 .5rem; letter-spacing:.02em}
+.ram{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap}
+.ram input{font:600 1.1rem var(--mono); width:6.5rem; padding:.4rem .6rem; border:2px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink)}
+.ram input::placeholder{font:500 .8rem var(--sans); color:var(--ink-soft); opacity:.8}
+.ram input:focus-visible{outline:3px solid var(--hazard); outline-offset:1px}
+.ram .unit{font-family:var(--mono); color:var(--ink-soft)}
+.ram-out{margin:.55rem 0 0; font-size:.9rem; color:var(--ink-soft); min-height:1.4em}
+.mem-kind{margin:0 0 .35rem}
+.mem-hint{margin:0 0 .6rem; font-size:.82rem; color:var(--ink-soft)}
+.go{display:inline-grid; place-items:center; width:2.4rem; height:2.4rem; padding:0; border-radius:8px; border:2px solid var(--ink); background:var(--hazard); color:var(--hazard-ink); cursor:pointer}
+.go:hover:not(:disabled){background:var(--ink); color:var(--hazard)}
+.go:disabled{opacity:.4; cursor:not-allowed}
+.go:focus-visible,.presets button:focus-visible{outline:3px solid var(--q4); outline-offset:2px}
+.presets{display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.6rem}
+.presets button{font:600 .8rem var(--mono); padding:.25rem .55rem; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center}
+.presets button[aria-pressed="true"]{border-color:var(--ink); background:var(--paper); box-shadow:inset 0 -3px 0 var(--hazard)}
+@keyframes flash{0%,100%{box-shadow:0 0 0 0 transparent} 30%{box-shadow:0 0 0 6px color-mix(in srgb, var(--you) 45%, transparent)}}
+.stop.flash{animation:flash 1.2s ease-out 2}
+@media (prefers-reduced-motion: reduce){.stop.flash{animation:none; outline:3px solid var(--you)}}
+.legend{display:flex; flex-wrap:wrap; gap:.45rem 1.4rem; font-size:.88rem; color:var(--ink-soft); align-items:center}
+.legend i{display:inline-block; width:22px; height:10px; border-radius:3px; vertical-align:middle; margin-right:.35rem}
+.legend .dev i{width:12px}
+
+/* ---------- shaft ---------- */
+.shaft{position:relative; padding-left:64px}
+.shaft::before{content:""; position:absolute; left:0; top:0; bottom:0; width:44px; background:var(--shaft); border-radius:6px}
+.shaft::after{content:""; position:absolute; left:14px; top:0; bottom:0; width:16px;
+  border-left:2px solid var(--cable); border-right:2px solid var(--cable)}
+.cable{position:absolute; left:21px; top:0; width:2px; background:var(--cable); z-index:2; pointer-events:none}
+.car{position:absolute; left:5px; top:0; width:34px; height:46px; z-index:3; pointer-events:none; will-change:transform}
+.car svg{width:100%; height:100%; display:block; filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.car .arm{transform-box:view-box; transform-origin:20.4px 24.5px}
+@media (prefers-reduced-motion: no-preference){
+  .car.open .arm{animation:wave .32s ease-in-out .35s 6 alternate}
+  @keyframes wave{from{transform:rotate(-18deg)} to{transform:rotate(22deg)}}
+}
+.car .door{transition:transform .35s ease}
+.car.open .door-l{transform:translateX(-11px)}
+.car.open .door-r{transform:translateX(11px)}
+.car .lamp{fill:var(--amber-dim); transition:fill .2s ease}
+.car.open .lamp{fill:var(--amber)}
+@media (prefers-reduced-motion: reduce){.car .door,.car .lamp{transition:none}}
+.surface{font-family:var(--sign); font-weight:700; letter-spacing:.06em; color:var(--ink-soft); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem}
+.surface::before{content:"G"; position:absolute; left:6px; width:32px; height:32px; display:grid; place-items:center; background:var(--hazard); color:var(--hazard-ink); border-radius:50%; font-weight:800; z-index:1}
+
+.level{position:relative; display:grid; grid-template-columns:118px 1fr 300px 140px; gap:1rem; align-items:start;
+  background:var(--paper); border:1px solid var(--line); border-left:6px solid var(--ink); border-radius:8px;
+  padding:1rem 1.1rem; margin:0 0 .8rem}
+.level .plate{position:absolute; left:-58px; top:1rem; width:32px; height:32px; display:grid; place-items:center;
+  background:var(--panel); color:var(--amber); font:600 .78rem var(--mono); border-radius:50%; border:2px solid var(--cable); z-index:1}
+.size{font-family:var(--sign); font-weight:800; font-size:1.55rem; line-height:1.05}
+.size small{display:block; font:500 .78rem var(--mono); color:var(--ink-soft); margin-top:.25rem}
+.gem{display:flex; align-items:center; gap:.35rem; margin-top:.55rem; font:500 .76rem var(--sans); color:var(--ink-soft); line-height:1.2}
+.gem svg{width:22px; height:22px; flex:none}
+.gem em{display:block; font-style:normal; font-size:.7rem; opacity:.85}
+.restricted .gem svg{filter:drop-shadow(0 0 4px #9B6BFF)}
+.gem.egg{position:relative; cursor:help; border-radius:6px; outline-offset:3px}
+.gem.egg:focus-visible{outline:2px solid var(--amber)}
+.gem.egg svg{border-radius:50%; transition:box-shadow .3s ease}
+.gem.egg:hover svg,.gem.egg:focus svg{box-shadow:0 0 0 3px var(--panel), 0 0 0 5px #9B6BFF, 0 0 14px 6px rgba(155,107,255,.5)}
+.egg-tip{position:absolute; left:0; bottom:calc(100% + 10px); width:280px; z-index:30; background:var(--panel); color:#E6E9EC;
+  font:400 .82rem/1.45 var(--sans); padding:.7rem .85rem; border-radius:8px; border:1px solid #9B6BFF; box-shadow:0 8px 24px rgba(0,0,0,.35);
+  opacity:0; transform:translateY(4px); pointer-events:none; transition:opacity .2s ease, transform .2s ease}
+.egg-tip b{display:block; font:600 .72rem var(--mono); color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem}
+.egg-tip::after{content:""; position:absolute; left:14px; top:100%; border:7px solid transparent; border-top-color:var(--panel)}
+.gem.egg:hover .egg-tip,.gem.egg:focus .egg-tip{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){.egg-tip,.gem.egg svg{transition:none}}
+.models{display:grid; gap:.6rem}
+.model .name{font-weight:600}
+.model .lab{color:var(--ink-soft); font-size:.84rem}
+.model p{margin:.1rem 0 0; font-size:.92rem; color:var(--ink-soft); max-width:58ch}
+.hf{display:inline-block; margin-left:.35rem; padding:0 .4rem; border-radius:4px; font:600 .7rem/1.6 var(--mono);
+  color:var(--ink); background:var(--hazard); text-decoration:none; vertical-align:2px}
+.hf:hover{background:var(--ink); color:var(--hazard)}
+.hf:focus-visible{outline:3px solid var(--q4); outline-offset:2px}
+.sig{display:inline-flex; gap:2px; align-items:flex-end; height:12px; margin-left:.35rem; vertical-align:-1px}
+.sig b{display:block; width:4px; border-radius:1px; background:var(--line)}
+.sig b:nth-child(1){height:5px} .sig b:nth-child(2){height:8px} .sig b:nth-child(3){height:12px}
+.sig b.on{background:var(--ink)}
+
+.mem{display:grid; gap:.35rem; font-size:.8rem}
+.bar{display:grid; grid-template-columns:24px 1fr 88px; align-items:center; gap:.4rem}
+.bar .q{font:600 .75rem var(--mono)}
+.track{position:relative; height:10px; background:var(--no-soft); border-radius:3px; overflow:hidden}
+.fill{position:absolute; inset:0 auto 0 0}
+.q4 .fill{background:var(--q4)} .q8 .fill{background:var(--q8)}
+.tick{position:absolute; top:0; bottom:0; width:3px; margin-left:-1.5px}
+.val{text-align:right; font:600 .78rem var(--mono); font-variant-numeric:tabular-nums}
+.fits{display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.2rem}
+.fits span{border-radius:4px; padding:.05rem .45rem; font-weight:600; font-size:.74rem; border:1px solid var(--line)}
+.ok{background:var(--ok-soft)} .meh{background:var(--warn-soft)} .no{background:var(--no-soft); color:var(--ink-soft)}
+.dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.3rem}
+.claude{font-size:.88rem; font-weight:600; border-left:2px solid var(--line); padding-left:.8rem}
+.claude small{display:block; font-weight:400; color:var(--ink-soft); font-size:.74rem}
+
+.restricted{border-left-color:var(--hazard);
+  background:repeating-linear-gradient(-45deg, transparent 0 18px, color-mix(in srgb, var(--hazard) 10%, transparent) 18px 36px), var(--paper)}
+
+/* stops */
+.stop{position:relative; margin:1rem 0 1.2rem; padding:.55rem .9rem .55rem 1rem; border-radius:8px; display:flex; gap:.7rem; align-items:center; font-weight:600}
+.stop .chip{font:600 .72rem var(--mono); padding:.1rem .45rem; border-radius:4px; background:var(--panel); color:var(--amber); white-space:nowrap}
+.stop small{font-weight:400; color:var(--ink-soft)}
+.stop::before{content:""; position:absolute; left:-58px; top:50%; width:32px; height:4px; margin-top:-2px; border-radius:2px; background:var(--c)}
+.stop.last{border:2px solid var(--c); background:var(--cs)}
+.stop.rec{border:2px dashed var(--c); background:var(--paper); font-weight:500}
+
+/* floating indicator */
+.indicator{position:fixed; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--panel); border:2px solid #2E343A;
+  border-radius:12px; padding:.55rem .8rem; min-width:150px; z-index:20; opacity:0; transform:translateY(8px); transition:opacity .25s ease, transform .25s ease; pointer-events:none}
+.indicator.show{opacity:1; transform:none}
+.indicator .lbl{font-family:var(--sign); font-weight:700; letter-spacing:.1em; color:#8C949C; font-size:.75rem}
+.indicator .big{font:600 1.6rem/1 var(--mono); color:var(--amber)}
+.indicator .sub{font:500 .78rem var(--mono); color:#C9CED4; margin-top:.2rem}
+@media (prefers-reduced-motion: reduce){.indicator{transition:none}}
+
+/* notes */
+.notes{margin-top:2.5rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem}
+.notes .box p{margin:0; font-size:.92rem; color:var(--ink-soft)}
+.notes .wide{grid-column:1 / -1}
+code{font-family:var(--mono); font-size:.85em; background:var(--no-soft); padding:.05rem .3rem; border-radius:4px}
+footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:center}
+
+@media (max-width:900px){
+  .level{grid-template-columns:90px 1fr; grid-template-areas:"size models" "mem mem" "claude claude"}
+  .size{grid-area:size} .models{grid-area:models} .mem{grid-area:mem} .claude{grid-area:claude; border-left:0; padding-left:0; border-top:1px solid var(--line); padding-top:.5rem}
+  .hero{grid-template-columns:1fr} .dial{justify-self:start}
+  .tools{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .shaft{padding-left:46px} .shaft::before{width:30px} .shaft::after{left:8px; width:14px}
+  .car{left:3px; width:24px; height:33px} .cable{left:14px}
+  .level .plate{left:-46px; width:28px; height:28px; font-size:.7rem}
+  .surface::before{left:0; width:28px; height:28px}
+  .stop::before{left:-44px; width:26px}
+  .level{grid-template-columns:1fr; grid-template-areas:"size" "models" "mem" "claude"}
+}
+@media print{.indicator{display:none} .level,.box,.stop{break-inside:avoid}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="g-opal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6F1FF"/><stop offset=".35" stop-color="#9FE3F2"/><stop offset=".6" stop-color="#F7A8D8"/><stop offset=".85" stop-color="#C8F2A6"/><stop offset="1" stop-color="#FFE3A3"/></linearGradient>
+    <linearGradient id="g-diamond" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#DDEFFF"/><stop offset="1" stop-color="#B8D6F2"/></linearGradient>
+    <radialGradient id="g-anti" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".3" stop-color="#C9A8FF"/><stop offset=".7" stop-color="#5A1FD1"/><stop offset="1" stop-color="#14002E"/></radialGradient>
+  </defs>
+</svg>
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <p class="kicker">A field guide to running open-weight LLMs locally</p>
+    <h1>How deep can your Mac go?</h1>
+    <p class="lede">Open-weight language models released in the past year, arranged as floors in an elevator shaft. Small models live near the surface; the giants are far below. Every Mac’s elevator only goes so deep, and the stops show where each one runs out of memory.</p>
+    <div class="updated" id="updated"></div>
+  </div>
+  <div class="dial" aria-hidden="true">
+    <div class="lbl">LEVELS BELOW GROUND</div>
+    <div class="big" id="levelCount">B00</div>
+    <div class="arrows"><span>▲</span><span class="on">▼</span></div>
+  </div>
+</header>
+
+<section class="tools" aria-label="Your machine and legend">
+  <div class="box">
+    <h2>Where does your elevator stop?</h2>
+    <div class="presets mem-kind" id="memKind" role="group" aria-label="Memory type">
+      <button type="button" data-kind="unified" aria-pressed="true">Unified</button>
+      <button type="button" data-kind="vram" aria-pressed="false">GPU VRAM</button>
+    </div>
+    <p class="mem-hint" id="memHint">Apple Silicon, or any shared-memory machine like AMD Strix Halo or NVIDIA DGX Spark.</p>
+    <div class="ram">
+      <label for="ram" id="ramLabel">Unified memory</label>
+      <input id="ram" type="number" inputmode="numeric" min="8" max="1024" step="8" placeholder="e.g. 48">
+      <span class="unit">GB</span>
+      <button type="button" class="go" id="go" disabled aria-label="Take me there" title="Take me there!"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="presets" id="presets" role="group" aria-label="Memory presets"></div>
+    <p class="ram-out" id="ramOut" aria-live="polite">Enter your memory to add your own stop to the shaft.</p>
+  </div>
+  <div class="box">
+    <h2>Reading the shaft</h2>
+    <div class="legend">
+      <span><i style="background:var(--q4)"></i>4-bit (Q4) memory</span>
+      <span><i style="background:var(--q8)"></i>8-bit (Q8) memory</span>
+      <span><span class="sig"><b class="on"></b><b class="on"></b><b class="on"></b></span> Popularity</span>
+      <span><a class="hf" tabindex="-1" aria-hidden="true">HF</a> Opens on Hugging Face</span>
+      <span>Gems get pricier the deeper you dig.</span>
+      <span>Solid box: last stop. Dashed box: recommended stop for multitasking.</span>
+      <span class="dev" id="devLegend"></span>
+    </div>
+  </div>
+</section>
+
+<main class="shaft" id="shaft" aria-label="Model levels, from the surface down"></main>
+
+<section class="notes" aria-label="How to read this">
+  <div class="box"><h2>Rule of thumb</h2><p>4-bit takes about 0.6GB per billion parameters; 8-bit about 1.1GB. Those figures cover weights only, so leave room for context and the OS.</p></div>
+  <div class="box"><h2>Mixture-of-experts</h2><p>An MoE model needs memory for all its parameters but runs at the speed of the few active per token. That’s why most big models today are MoE.</p></div>
+  <div class="box"><h2>The macOS memory cap</h2><p>macOS lets the GPU use roughly two-thirds to three-quarters of unified memory by default. You can raise it with <code>sudo sysctl iogpu.wired_limit_mb=…</code>.</p></div>
+  <div class="box"><h2>Comparable Claude model</h2><p>Names the Claude model you’d reach for to do the same kind of task. It isn’t a claim of equal performance; open models still trail on harder versions of these tasks.</p></div>
+  <div class="box wide"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
+</section>
+
+<footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.</footer>
+</div>
+
+<div class="indicator" id="indicator" aria-hidden="true">
+  <div class="lbl">NOW PASSING</div>
+  <div class="big" id="indLevel">G</div>
+  <div class="sub" id="indSub">Surface</div>
+</div>
+
+<!-- Data lives here so it can be lifted into a JSON file for pull requests. -->
+<script id="model-data" type="application/json">
+{
+ "updated": "October 29, 2026",
+ "devices": [
+  {
+   "name": "32GB MacBook Pro",
+   "short": "32GB laptop",
+   "ram": 32,
+   "usable": 21,
+   "raised": 26,
+   "laptop": true,
+   "color": "d32"
+  },
+  {
+   "name": "64GB MacBook Pro",
+   "short": "64GB laptop",
+   "ram": 64,
+   "usable": 48,
+   "raised": 56,
+   "laptop": true,
+   "color": "d64"
+  },
+  {
+   "name": "128GB Mac Studio",
+   "short": "128GB Studio",
+   "ram": 128,
+   "usable": 96,
+   "raised": 120,
+   "laptop": false,
+   "color": "d128"
+  },
+  {
+   "name": "256GB Mac Studio",
+   "short": "256GB Studio",
+   "ram": 256,
+   "usable": 192,
+   "raised": 240,
+   "laptop": false,
+   "color": "d256"
+  },
+  {
+   "name": "512GB Mac Studio",
+   "short": "512GB Studio",
+   "ram": 512,
+   "usable": 384,
+   "raised": 480,
+   "laptop": false,
+   "color": "d512"
+  }
+ ],
+ "appsReserveGB": 16,
+ "contextReserveGB": 4,
+ "levels": [
+  {
+   "size": "~4B",
+   "q4": 2.5,
+   "q8": 4.5,
+   "claude": "Haiku 5.5",
+   "claudeNote": "overqualified",
+   "models": [
+    {
+     "name": "Qwen3.5-4B",
+     "lab": "Alibaba",
+     "use": "Autocomplete, classification, quick summaries, and cheap subtasks inside an agent pipeline.",
+     "pop": 3,
+     "hf": "https://huggingface.co/Qwen/Qwen3.5-4B"
+    }
+   ],
+   "gem": {
+    "name": "Quartz",
+    "color": "#D9D6CF",
+    "note": "free in most driveways"
+   }
+  },
+  {
+   "size": "~9B",
+   "q4": 5.5,
+   "q8": 10,
+   "claude": "Haiku 5.5",
+   "models": [
+    {
+     "name": "Qwen3.5-9B",
+     "lab": "Alibaba",
+     "use": "Everyday chat, data extraction, and simple RAG.",
+     "pop": 3,
+     "hf": "https://huggingface.co/Qwen/Qwen3.5-9B"
+    }
+   ],
+   "gem": {
+    "name": "Agate",
+    "color": "#C27C4E"
+   }
+  },
+  {
+   "size": "~12B",
+   "q4": 7.5,
+   "q8": 13,
+   "claude": "Haiku 5.5",
+   "models": [
+    {
+     "name": "Gemma 4 12B",
+     "lab": "Google",
+     "use": "Lightweight multimodal work, including audio.",
+     "pop": 2,
+     "hf": "https://huggingface.co/google/gemma-4-12B-it"
+    }
+   ],
+   "gem": {
+    "name": "Amethyst",
+    "color": "#9B5DE5"
+   }
+  },
+  {
+   "size": "~24–26B",
+   "q4": 15,
+   "q8": 28,
+   "q4Label": "~14–15GB",
+   "q8Label": "~26–28GB",
+   "claude": "Haiku 5.5",
+   "models": [
+    {
+     "name": "Gemma 4 26B-A4B",
+     "lab": "Google",
+     "use": "Fast reasoning on modest hardware.",
+     "pop": 2,
+     "hf": "https://huggingface.co/google/gemma-4-26B-A4B-it"
+    },
+    {
+     "name": "Devstral Small 2",
+     "lab": "Mistral",
+     "use": "Local coding agents.",
+     "pop": 1,
+     "hf": "https://huggingface.co/mistralai/Devstral-Small-2-24B-Instruct-2512"
+    }
+   ],
+   "gem": {
+    "name": "Garnet",
+    "color": "#8E1B2E"
+   }
+  },
+  {
+   "size": "~27–35B",
+   "q4": 21,
+   "q8": 38,
+   "q4Label": "~17–21GB",
+   "q8Label": "~30–38GB",
+   "claude": "Haiku 5.5 to Sonnet 5.5",
+   "models": [
+    {
+     "name": "Qwen3.8-27B",
+     "lab": "Alibaba",
+     "use": "The best all-rounder, with vision.",
+     "pop": 3,
+     "hf": "https://huggingface.co/Qwen/Qwen3.8-27B"
+    },
+    {
+     "name": "Qwen3.6-35B-A3B",
+     "lab": "Alibaba",
+     "use": "Fast agentic and tool-use loops.",
+     "pop": 3,
+     "hf": "https://huggingface.co/Qwen/Qwen3.6-35B-A3B"
+    },
+    {
+     "name": "Gemma 4 31B",
+     "lab": "Google",
+     "use": "Writing, general Q&A, and multimodal tasks.",
+     "pop": 2,
+     "hf": "https://huggingface.co/google/gemma-4-31B-it"
+    },
+    {
+     "name": "GLM-4.7-Flash",
+     "lab": "Z.ai",
+     "use": "Reasoning and tool use.",
+     "pop": 2,
+     "hf": "https://huggingface.co/zai-org/GLM-4.7-Flash"
+    },
+    {
+     "name": "Muse Glimmer 30B",
+     "lab": "Meta",
+     "use": "Always-on local agents, coding, and document analysis; reads text and images.",
+     "pop": 2,
+     "hf": "https://huggingface.co/meta-models/Muse-Glimmer-30B"
+    },
+    {
+     "name": "Nemotron 3.5 Lightning",
+     "lab": "NVIDIA",
+     "use": "Long-context agents.",
+     "pop": 1,
+     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4"
+    }
+   ],
+   "gem": {
+    "name": "Peridot",
+    "color": "#A6C83A"
+   }
+  },
+  {
+   "size": "~70B",
+   "kind": "dense",
+   "q4": 42,
+   "q8": 75,
+   "claude": "Sonnet 5.5",
+   "models": [
+    {
+     "name": "Apertus 1.5 70B",
+     "lab": "ETH Zurich & EPFL",
+     "use": "Research where provenance matters: open data and training code. The last dense 70B standing.",
+     "pop": 1,
+     "hf": "https://huggingface.co/swiss-ai/Apertus-v1.5-70B"
+    }
+   ],
+   "gem": {
+    "name": "Aquamarine",
+    "color": "#7FD6E3"
+   }
+  },
+  {
+   "size": "~80B",
+   "kind": "MoE",
+   "q4": 44,
+   "q8": 85,
+   "claude": "Sonnet 5.5",
+   "models": [
+    {
+     "name": "Qwen3-Coder-Next",
+     "lab": "Alibaba",
+     "use": "Agentic coding in harnesses like Claude Code or Cline.",
+     "pop": 2,
+     "hf": "https://huggingface.co/Qwen/Qwen3-Coder-Next"
+    }
+   ],
+   "gem": {
+    "name": "Tanzanite",
+    "color": "#4B3FA8"
+   }
+  },
+  {
+   "size": "~120B",
+   "kind": "MoE",
+   "q4": 73,
+   "q8": 135,
+   "q4Label": "~65–73GB",
+   "q8Label": "~125–135GB",
+   "claude": "Sonnet 5.5",
+   "models": [
+    {
+     "name": "Qwen3.5-122B-A10B",
+     "lab": "Alibaba",
+     "use": "Multilingual, multimodal generalist.",
+     "pop": 2,
+     "hf": "https://huggingface.co/Qwen/Qwen3.5-122B-A10B"
+    },
+    {
+     "name": "Nemotron 3 Super",
+     "lab": "NVIDIA",
+     "use": "General agent work.",
+     "pop": 2,
+     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+    },
+    {
+     "name": "Mistral Small 4",
+     "lab": "Mistral",
+     "use": "Instruct, reasoning, and coding in one model.",
+     "pop": 1,
+     "hf": "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603"
+    }
+   ],
+   "gem": {
+    "name": "Opal",
+    "color": "url(#g-opal)"
+   }
+  },
+  {
+   "size": "~280–320B",
+   "kind": "MoE",
+   "q4": 185,
+   "q8": 350,
+   "q4Label": "~160–185GB",
+   "q8Label": "~310–350GB",
+   "claude": "Sonnet 5.5",
+   "models": [
+    {
+     "name": "GLM-5.3 Flash",
+     "lab": "Z.ai",
+     "use": "Agents and long documents; reads text, images, and video. MIT license.",
+     "pop": 3,
+     "hf": "https://huggingface.co/zai-org/GLM-5.3-Flash"
+    },
+    {
+     "name": "MiMo-V2.6-Flash",
+     "lab": "Xiaomi",
+     "use": "Cheap, high-volume agent loops and coding. MIT license.",
+     "pop": 3,
+     "hf": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL"
+    },
+    {
+     "name": "DeepSeek V4 Flash",
+     "lab": "DeepSeek",
+     "use": "Fast, low-cost text automation with a 1M-token context. MIT license.",
+     "pop": 3,
+     "hf": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731"
+    }
+   ],
+   "gem": {
+    "name": "Sapphire",
+    "color": "#1F4FD1"
+   }
+  },
+  {
+   "size": "~430–550B",
+   "kind": "MoE",
+   "q4": 315,
+   "q8": 605,
+   "q4Label": "~245–315GB",
+   "q8Label": "~470–605GB",
+   "claude": "Sonnet 5.5 to Opus 5.5",
+   "models": [
+    {
+     "name": "DeepSeek V4.1 Flash",
+     "lab": "DeepSeek",
+     "use": "Agentic coding at volume. Currently the most-used model on OpenRouter; DeepSeek hasn’t fully detailed its architecture.",
+     "pop": 3,
+     "hf": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
+    },
+    {
+     "name": "MiniMax M3.1 Flash",
+     "lab": "MiniMax",
+     "use": "Coding, agents, and computer use; reads text, images, and video.",
+     "pop": 3,
+     "hf": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash"
+    },
+    {
+     "name": "Nemotron 3 Ultra",
+     "lab": "NVIDIA",
+     "use": "General reasoning and agents; free tier on OpenRouter.",
+     "pop": 3,
+     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"
+    }
+   ],
+   "gem": {
+    "name": "Emerald",
+    "color": "#1E9E5A"
+   }
+  },
+  {
+   "size": "~750–850B",
+   "kind": "MoE",
+   "q4": 465,
+   "q8": 900,
+   "q4Label": "~430–465GB",
+   "q8Label": "~830–900GB",
+   "claude": "Opus 5.5",
+   "models": [
+    {
+     "name": "GLM-5.3",
+     "lab": "Z.ai",
+     "use": "Near-frontier terminal coding and cybersecurity tasks.",
+     "pop": 2,
+     "hf": "https://huggingface.co/zai-org/GLM-5.3"
+    },
+    {
+     "name": "Muse Spark Open",
+     "lab": "Meta",
+     "use": "Long-horizon coding and agents with a 1M-token context; reads text, images, video, and audio. Tuned for M5 Ultra Mac Studios.",
+     "pop": 2,
+     "hf": "https://huggingface.co/collections/meta-models/muse-spark-open"
+    }
+   ],
+   "gem": {
+    "name": "Ruby",
+    "color": "#D3123A"
+   }
+  },
+  {
+   "size": "~1T",
+   "kind": "MoE",
+   "q4": 550,
+   "q8": 1100,
+   "q8Label": "~1.1TB",
+   "claude": "Opus 5.5",
+   "models": [
+    {
+     "name": "Kimi K2.7 Code",
+     "lab": "Moonshot AI",
+     "use": "Long-horizon agentic coding. Superseded by K3 for most uses.",
+     "pop": 1,
+     "hf": "https://huggingface.co/moonshotai/Kimi-K2.7-Code"
+    }
+   ],
+   "gem": {
+    "name": "Diamond",
+    "color": "url(#g-diamond)"
+   }
+  },
+  {
+   "size": "~2.8T",
+   "kind": "MoE",
+   "q4": 1560,
+   "q8": 3000,
+   "q4Label": "~1.56TB",
+   "q8Label": "~3TB",
+   "claude": "Opus 5.5 to Fable 5.1",
+   "models": [
+    {
+     "name": "Kimi K3",
+     "lab": "Moonshot AI",
+     "use": "Frontier-class reasoning and multimodal agents with a 1M-token context. Datacenter hardware only, under a restrictive commercial license.",
+     "pop": 2,
+     "hf": "https://huggingface.co/moonshotai/Kimi-K3"
+    }
+   ],
+   "gem": {
+    "name": "Red diamond",
+    "color": "#A3001F"
+   }
+  },
+  {
+   "size": "Restricted",
+   "restricted": true,
+   "claude": "Fable 5.1",
+   "claudeNote": "Mythos tier",
+   "models": [
+    {
+     "name": "No open-weight equivalent yet",
+     "lab": "",
+     "use": "Frontier research and the hardest reasoning tasks. Authorized personnel only."
+    }
+   ],
+   "gem": {
+    "name": "Antimatter",
+    "color": "url(#g-anti)",
+    "note": "about $62 trillion a gram",
+    "egg": "Relax, nothing’s exploding. This antimatter is floating in a Penning trap, where electric and magnetic fields hold it in a near-perfect vacuum so it never touches a single atom of the container. Also, humanity has only ever made a few billionths of a gram, so “a gram” is extremely aspirational."
+   }
+  }
+ ]
+}
+</script>
+
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("model-data").textContent);
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const MIN = 1, MAX = 3200;
+  const pct = v => Math.max(2, (Math.log(v) - Math.log(MIN)) / (Math.log(MAX) - Math.log(MIN)) * 100);
+  const fmt = v => v >= 1000 ? "~" + (v/1000).toFixed(1) + "TB" : "~" + v + "GB";
+  const lvl = i => "B" + String(i + 1).padStart(2, "0");
+  const hfUrl = v => !v ? null : v.startsWith("http") ? v : "https://huggingface.co/models?search=" + encodeURIComponent(v);
+
+  $("updated").textContent = "Last updated " + D.updated;
+  $("levelCount").textContent = lvl(D.levels.length - 1);
+  $("devLegend").innerHTML = D.devices.map(d => `<i class="dot" style="background:var(--${d.color})"></i>${esc(d.short)}`).join(" &nbsp; ");
+
+  function smallest(v){
+    for (const d of D.devices){
+      const dot = `<i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>`;
+      if (v <= d.usable) return {cls:"ok", text:dot + d.short};
+      if (v <= d.raised) return {cls:"meh", text:dot + d.short + ", raised limit"};
+    }
+    return {cls:"no", text:"Bigger than any single Mac"};
+  }
+
+  // Work out where each stop goes: after the deepest level that fits.
+  function deepestFit(limit){
+    let idx = -1;
+    D.levels.forEach((l, i) => { if (!l.restricted && l.q4 <= limit) idx = i; });
+    return idx;
+  }
+  const stopsAfter = {};
+  const addStop = (i, html) => { if (i < 0) return; (stopsAfter[i] = stopsAfter[i] || []).push(html); };
+  for (const d of D.devices){
+    if (d.laptop){
+      const comfy = d.ram - D.appsReserveGB - D.contextReserveGB;
+      addStop(deepestFit(comfy), `<div class="stop rec" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">REC</span><div>Recommended stop for a ${esc(d.name)} <small>Leaves about ${D.appsReserveGB}GB for your apps and ${D.contextReserveGB}GB for context (weights up to ~${comfy}GB).</small></div></div>`);
+    }
+    addStop(deepestFit(d.raised), `<div class="stop last" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`);
+  }
+
+  const ticks = D.devices.map(d => `<span class="tick" style="left:${pct(d.ram)}%;background:var(--${d.color})"></span>`).join("");
+  const bar = (q, v, label) => `<div class="bar ${q}"><span class="q">${q.toUpperCase()}</span><span class="track"><span class="fill" style="width:${pct(v)}%"></span>${ticks}</span><span class="val">${label || fmt(v)}</span></div>`;
+  const gemSvg = c => `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6,3 18,3 22,9 12,21 2,9" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1" stroke-linejoin="round"/><path d="M2 9h20M6 3l3 6 3-6 3 6 3-6M9 9l3 12 3-12" fill="none" stroke="rgba(0,0,0,.22)" stroke-width=".8"/><path d="M7.5 4.5l1.6 3" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+  const gem = g => {
+    if (!g) return "";
+    const body = `${gemSvg(g.color)}<span>${esc(g.name)}${g.note ? `<em>${esc(g.note)}</em>` : ""}</span>`;
+    if (!g.egg) return `<div class="gem">${body}</div>`;
+    return `<div class="gem egg" tabindex="0" aria-describedby="egg-tip">${body}<span class="egg-tip" id="egg-tip" role="tooltip"><b>Containment status: stable</b>${esc(g.egg)}</span></div>`;
+  };
+  const signal = n => n ? `<span class="sig" role="img" aria-label="Popularity ${n} of 3">${[1,2,3].map(k => `<b class="${k<=n?"on":""}"></b>`).join("")}</span>` : "";
+
+  let html = `<div class="surface">Ground level: your desk</div>`;
+  D.levels.forEach((l, i) => {
+    const models = l.models.map(m => {
+      const u = hfUrl(m.hf);
+      const link = u ? `<a class="hf" href="${u}" target="_blank" rel="noopener" aria-label="Open ${esc(m.name)} on Hugging Face">HF</a>` : "";
+      return `<div class="model"><span class="name">${esc(m.name)}</span>${signal(m.pop)}${link}${m.lab ? ` <span class="lab">${esc(m.lab)}</span>` : ""}<p>${esc(m.use)}</p></div>`;
+    }).join("");
+    let mem;
+    if (l.restricted){
+      mem = `<div class="mem"><div class="fits"><span class="no">Weights not available</span></div></div>`;
+    } else {
+      const a = smallest(l.q4), b = smallest(l.q8);
+      mem = `<div class="mem" aria-label="Memory needs">${bar("q4", l.q4, l.q4Label)}${bar("q8", l.q8, l.q8Label)}<div class="fits"><span class="${a.cls}">Q4: ${a.text}</span><span class="${b.cls}">Q8: ${b.text}</span></div></div>`;
+    }
+    html += `<article class="level${l.restricted ? " restricted" : ""}" id="${lvl(i).toLowerCase()}" data-level="${lvl(i)}" data-size="${esc(l.size)}" data-gem="${l.gem ? esc(l.gem.name) : ""}">
+      <span class="plate" aria-hidden="true">${lvl(i)}</span>
+      <div class="size">${esc(l.size)}<small>${lvl(i)}${l.kind ? " " + esc(l.kind) : ""}</small>${gem(l.gem)}</div>
+      <div class="models">${models}</div>
+      ${mem}
+      <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}</div>
+    </article>`;
+    if (stopsAfter[i]) html += stopsAfter[i].join("");
+    html += `<div class="you-slot" data-after="${i}"></div>`;
+  });
+  $("shaft").innerHTML = html;
+
+  // Your own stop
+  const ramIn = $("ram"), ramOut = $("ramOut"), go = $("go"), presets = $("presets");
+  presets.innerHTML = D.devices.map(d => `<button type="button" data-ram="${d.ram}" aria-pressed="false"><i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}</button>`).join("");
+  const memKind = $("memKind"), memHint = $("memHint"), ramLabel = $("ramLabel");
+  const KINDS = {
+    unified: {label:"Unified memory", noun:"of unified memory", hint:"Apple Silicon, or any shared-memory machine like AMD Strix Halo or NVIDIA DGX Spark."},
+    vram: {label:"GPU VRAM", noun:"of VRAM", hint:"A dedicated GPU’s memory; add up multiple cards. Assumes the whole model fits on the GPU, with no offloading to system RAM."}
+  };
+  let kind = "unified";
+  function setKind(k){
+    kind = k;
+    memKind.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.kind === k ? "true" : "false"));
+    ramLabel.textContent = KINDS[k].label;
+    memHint.textContent = KINDS[k].hint;
+    updateYou();
+  }
+  memKind.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (b) setKind(b.dataset.kind);
+  });
+  presets.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    ramIn.value = b.dataset.ram;
+    if (kind !== "unified") setKind("unified"); else updateYou();
+  });
+  go.addEventListener("click", () => {
+    const stop = document.querySelector(".you-slot .stop");
+    if (!stop) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    stop.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "center"});
+    stop.classList.remove("flash"); void stop.offsetWidth; stop.classList.add("flash");
+  });
+  function updateYou(){
+    presets.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.ram === ramIn.value ? "true" : "false"));
+    go.disabled = true;
+    document.querySelectorAll(".you-slot").forEach(s => s.innerHTML = "");
+    const ram = parseFloat(ramIn.value);
+    if (!ram || ram < 4){ ramOut.textContent = "Enter your memory to add your own stop to the shaft."; return; }
+    const known = kind === "unified" && D.devices.find(d => d.ram === ram);
+    // Dedicated VRAM only loses the driver context and display buffers; unified memory shares with the OS and apps.
+    const usable = known ? known.usable
+      : kind === "vram" ? Math.floor(ram * 0.9)
+      : Math.round(ram * (ram <= 36 ? 0.67 : 0.75));
+    const i = deepestFit(usable);
+    if (i < 0){ ramOut.textContent = `About ${usable}GB usable: smaller than the first level here, so look for models under 4B.`; return; }
+    const slot = document.querySelector(`.you-slot[data-after="${i}"]`);
+    slot.innerHTML = `<div class="stop last" style="--c:var(--you);--cs:var(--yous)" role="note"><span class="chip">YOU</span><div>Your elevator’s last stop <small>${ram}GB ${KINDS[kind].noun}, about ${usable}GB usable by the GPU${kind === "unified" ? " by default" : ""}.</small></div></div>`;
+    ramOut.textContent = `About ${usable}GB usable: you can reach ${lvl(i)} (${D.levels[i].size}).`;
+    go.disabled = false;
+  }
+  ramIn.addEventListener("input", updateYou);
+
+  // Floor indicator
+  const ind = $("indicator"), indLevel = $("indLevel"), indSub = $("indSub");
+  const levels = [...document.querySelectorAll(".level")];
+  let ticking = false;
+  function updateIndicator(){
+    ticking = false;
+    let current = null;
+    for (const el of levels){
+      if (el.getBoundingClientRect().top < innerHeight * 0.5) current = el; else break;
+    }
+    if (current){
+      indLevel.textContent = current.dataset.level;
+      indSub.textContent = current.dataset.size + (current.dataset.gem ? "  " + current.dataset.gem : "");
+      ind.classList.add("show");
+    } else {
+      ind.classList.remove("show");
+    }
+  }
+
+  // Elevator car that rides down the shaft with you
+  const shaft = $("shaft");
+  shaft.insertAdjacentHTML("beforeend", `<div class="cable" id="cable"></div>
+  <div class="car" id="car" aria-hidden="true"><svg viewBox="0 0 34 46">
+    <defs><clipPath id="doorway"><rect x="5" y="10" width="24" height="32"/></clipPath></defs>
+    <rect x="1" y="1" width="32" height="44" rx="3" fill="#3A4148" stroke="#8A939C" stroke-width="1.5"/>
+    <circle class="lamp" cx="17" cy="5.5" r="2.2"/>
+    <rect x="5" y="10" width="24" height="32" fill="#FFE2A8"/>
+    <rect x="5" y="40" width="24" height="2" fill="#E2B477"/>
+    <g class="rider">
+      <rect x="14.2" y="32" width="2.4" height="8.5" rx="1.1" fill="#1B2025"/>
+      <rect x="17.4" y="32" width="2.4" height="8.5" rx="1.1" fill="#1B2025"/>
+      <rect x="13" y="22" width="8" height="11.5" rx="3" fill="#E77500"/>
+      <path d="M13.6 24.5 L11.6 31" stroke="#E77500" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="11.5" cy="31.4" r="1.2" fill="#D9A27A"/>
+      <g class="arm">
+        <path d="M20.4 24.5 L24.6 18.6" stroke="#E77500" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="24.9" cy="18.1" r="1.3" fill="#D9A27A"/>
+      </g>
+      <circle cx="17" cy="18" r="3.6" fill="#D9A27A"/>
+      <path d="M13.5 17.2 q3.5 -5 7 0 q-1.5 -2 -3.5 -1.6 q-2 -.4 -3.5 1.6z" fill="#3B2A20"/>
+      <circle cx="15.7" cy="18.4" r=".5" fill="#1B2025"/><circle cx="18.3" cy="18.4" r=".5" fill="#1B2025"/>
+      <path d="M15.9 19.9 q1.1 .9 2.2 0" stroke="#1B2025" stroke-width=".5" fill="none" stroke-linecap="round"/>
+    </g>
+    <g clip-path="url(#doorway)">
+      <rect class="door door-l" x="5" y="10" width="12" height="32" fill="#C9CED4" stroke="#8A939C" stroke-width=".8"/>
+      <rect class="door door-r" x="17" y="10" width="12" height="32" fill="#C9CED4" stroke="#8A939C" stroke-width=".8"/>
+    </g>
+  </svg></div>`);
+  const car = $("car"), cable = $("cable");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let carY = 0, carTarget = 0, carRaf = null, idleTimer = null;
+  function carGoal(){
+    const r = shaft.getBoundingClientRect();
+    const h = car.offsetHeight;
+    return Math.max(0, Math.min(r.height - h, innerHeight * 0.45 - r.top - h / 2));
+  }
+  function placeCar(){
+    car.style.transform = `translateY(${carY}px)`;
+    cable.style.height = carY + 4 + "px";
+  }
+  function stepCar(){
+    const d = carTarget - carY;
+    if (reduceMotion.matches || Math.abs(d) < 0.5){ carY = carTarget; placeCar(); carRaf = null; return; }
+    carY += d * 0.16; placeCar();
+    carRaf = requestAnimationFrame(stepCar);
+  }
+  function onMove(){
+    carTarget = carGoal();
+    car.classList.remove("open");
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => car.classList.add("open"), 450);
+    if (!carRaf) carRaf = requestAnimationFrame(stepCar);
+  }
+  addEventListener("scroll", onMove, {passive:true});
+  addEventListener("resize", onMove);
+  carY = carTarget = carGoal(); placeCar(); car.classList.add("open");
+  addEventListener("scroll", () => { if (!ticking){ ticking = true; requestAnimationFrame(updateIndicator); } }, {passive:true});
+  updateIndicator();
+})();
+</script>
+</body>
+</html>
