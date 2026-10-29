@@ -230,8 +230,11 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 
 /* floating indicator */
 .indicator{position:fixed; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--panel); border:2px solid #2E343A;
+  display:flex; align-items:center; justify-content:space-between; gap:.9rem;
   border-radius:12px; padding:.55rem .8rem; min-width:150px; z-index:20; opacity:0; transform:translateY(8px); transition:opacity .25s ease, transform .25s ease; pointer-events:none}
 .indicator.show{opacity:1; transform:none}
+.ind-gem svg{display:block; width:30px; height:30px; filter:drop-shadow(0 0 6px rgba(255,255,255,.18))}
+.ind-gem.restricted svg{filter:drop-shadow(0 0 5px #9B6BFF)}
 .indicator .lbl{font-family:var(--sign); font-weight:700; letter-spacing:.1em; color:#8C949C; font-size:.75rem}
 .indicator .big{font:600 1.6rem/1 var(--mono); color:var(--amber)}
 .indicator .sub{font:500 .78rem var(--mono); color:#C9CED4; margin-top:.2rem}
@@ -340,10 +343,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       <span><i style="background:var(--q8)"></i>8-bit (Q8) memory</span>
       <span><span class="sig"><b class="on"></b><b class="on"></b><b class="on"></b></span> Popularity</span>
       <span><a class="hf" tabindex="-1" aria-hidden="true">HF</a> Opens on Hugging Face</span>
-      <span>Gems get pricier the deeper you dig.</span>
       <span>Solid box: last stop. Dashed box: recommended stop for multitasking.</span>
       <span class="dev" id="devLegend"></span>
       <span class="aside"><b>Why a filing cabinet?</b> Unicode has no Mac Studio emoji. This was the closest match: a squat metal box that lives by your desk and holds a frankly alarming amount of weights.</span>
+      <span class="aside"><b>Why gems?</b> It’s a mine shaft, so digging deeper ought to turn up something shinier. They run roughly from cheapest to priciest, quartz to red diamond, with one exhibit at the bottom that no mine has produced. They’re decoration only: a gem says nothing about a model, and real gem prices swing too much with quality for the order to be more than loose.</span>
+      <span class="aside"><b>That’s… a Chaos Emerald!</b> Sorry, we’re not playing Sonic right now. It’s a plain emerald on B10, and collecting all seven won’t make your GPU go Super.</span>
     </div>
   </div>
 </section>
@@ -364,9 +368,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 </div>
 
 <div class="indicator" id="indicator" aria-hidden="true">
-  <div class="lbl">NOW PASSING</div>
-  <div class="big" id="indLevel">G</div>
-  <div class="sub" id="indSub">Surface</div>
+  <div>
+    <div class="lbl">NOW PASSING</div>
+    <div class="big" id="indLevel">G</div>
+    <div class="sub" id="indSub">Surface</div>
+  </div>
+  <div class="ind-gem" id="indGem"></div>
 </div>
 
 <!-- Data lives here so it can be lifted into a JSON file for pull requests. -->
@@ -891,7 +898,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       const dc = D.datacenter.map(g => `<b>${Math.ceil(l.q8 / (g.vram * VRAM_USABLE))}×</b> <a href="${g.url}" target="_blank" rel="noopener">${esc(g.short)}</a>`).join(" · ");
       mem = `<div class="mem" aria-label="Memory needs">${bar("q4", l.q4, l.q4Label)}${bar("q8", l.q8, l.q8Label)}<div class="fits"><span class="${a.cls}">Q4: ${a.text}</span><span class="${b.cls}">Q8: ${b.text}</span></div><div class="dc"><span aria-hidden="true">🏢</span> Data center, 8-bit: ${dc}</div></div>`;
     }
-    html += `<article class="level${l.restricted ? " restricted" : ""}" id="${lvl(i).toLowerCase()}" data-level="${lvl(i)}" data-size="${esc(l.size)}" data-gem="${l.gem ? esc(l.gem.name) : ""}">
+    html += `<article class="level${l.restricted ? " restricted" : ""}" id="${lvl(i).toLowerCase()}" data-level="${lvl(i)}" data-size="${esc(l.size)}" data-gem="${l.gem ? esc(l.gem.name) : ""}" data-gem-color="${l.gem ? esc(l.gem.color) : ""}">
       <span class="plate" aria-hidden="true">${lvl(i)}</span>
       <div class="size">${esc(l.size)}<small>${lvl(i)}${l.kind ? " " + esc(l.kind) : ""}</small>${gem(l.gem)}</div>
       <div class="models">${models}</div>
@@ -993,7 +1000,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   reset();
 
   // Floor indicator
-  const ind = $("indicator"), indLevel = $("indLevel"), indSub = $("indSub");
+  const ind = $("indicator"), indLevel = $("indLevel"), indSub = $("indSub"), indGem = $("indGem");
   const levels = [...document.querySelectorAll(".level")];
   let ticking = false;
   function updateIndicator(){
@@ -1006,6 +1013,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     if (current){
       indLevel.textContent = current.dataset.level;
       indSub.textContent = current.dataset.size + (current.dataset.gem ? "  " + current.dataset.gem : "");
+      if (indGem.dataset.level !== current.dataset.level){
+        indGem.dataset.level = current.dataset.level;
+        indGem.innerHTML = current.dataset.gemColor ? gemSvg(current.dataset.gemColor) : "";
+        indGem.classList.toggle("restricted", current.classList.contains("restricted"));
+      }
       ind.classList.add("show");
     } else {
       ind.classList.remove("show");
