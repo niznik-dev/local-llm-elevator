@@ -235,6 +235,14 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.3rem}
 .claude{font-size:.88rem; font-weight:600; border-left:2px solid var(--line); padding-left:.8rem}
 .claude small{display:block; font-weight:400; color:var(--ink-soft); font-size:.74rem}
+.claude small.next{margin-top:.45rem}
+.claude{position:relative}
+.star{color:var(--hazard); font-weight:700; cursor:help; padding:0 .15rem; border-radius:3px}
+.star:focus-visible{outline:2px solid var(--amber)}
+.star-tip{position:absolute; right:0; width:min(17rem, 85vw); top:calc(100% + 6px); z-index:30; background:var(--panel); color:#E6E9EC; font:400 .78rem/1.4 var(--sans);
+  padding:.45rem .65rem; border-radius:6px; border:1px solid var(--hazard); box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; visibility:hidden; transition:opacity .2s ease, visibility .2s}
+.star:is(:hover,:focus) .star-tip{opacity:1; visibility:visible}
+@media (prefers-reduced-motion: reduce){.star-tip{transition:none}}
 
 .restricted{border-left-color:var(--hazard);
   background:repeating-linear-gradient(-45deg, transparent 0 18px, color-mix(in srgb, var(--hazard) 10%, transparent) 18px 36px), var(--paper)}
@@ -390,7 +398,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   <div class="box"><h2>Rule of thumb</h2><p>4-bit takes about 0.6GB per billion parameters; 8-bit about 1.1GB. Those figures cover weights only, so leave room for context and the OS.</p></div>
   <div class="box"><h2>Mixture-of-experts</h2><p>An MoE model needs memory for all its parameters but runs at the speed of the few active per token. That’s why most big models today are MoE.</p></div>
   <div class="box"><h2>Data center GPUs</h2><p>The 🏢 line counts 80GB <a href="https://en.wikipedia.org/wiki/Hopper_(microarchitecture)" target="_blank" rel="noopener">H100s</a> (<a href="https://en.wikipedia.org/wiki/Ampere_(microarchitecture)" target="_blank" rel="noopener">A100s</a> are the same size) and ~180GB <a href="https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)" target="_blank" rel="noopener">B200s</a> needed to hold 8-bit (FP8) weights, using 90% of each card. Real deployments round up to 2, 4, or 8 GPUs per server and want spare memory for long contexts and many users.</p></div>
-  <div class="box"><h2>Comparable Claude model</h2><p>Names the Claude model you’d reach for to do the same kind of task. It isn’t a claim of equal performance; open models still trail on harder versions of these tasks.</p></div>
+  <div class="box"><h2>Comparable Claude and ChatGPT models</h2><p>Names the Claude and ChatGPT API models you’d reach for to do the same kind of task. It isn’t a claim of equal performance; open models still trail on harder versions of these tasks.</p></div>
   <div class="box row2-a" id="capUnified"><h2>Shared-memory caps</h2><p><b>Mac:</b> the GPU gets roughly two-thirds to three-quarters by default. Raise it with <code>sudo sysctl iogpu.wired_limit_mb=…</code>.</p><p><b>Strix Halo:</b> set the GPU’s share in the BIOS or AMD’s Variable Graphics Memory (up to 96GB of 128GB on Windows; Linux can go a little higher via the amdgpu GTT limit).</p><p><b>DGX Spark:</b> no fixed split; the GPU can use whatever the OS isn’t.</p></div>
   <div class="box row2-a" id="capVram" hidden><h2>The VRAM wall</h2><p>There’s no cap to raise: VRAM is whatever is soldered onto the card. The driver and your display take roughly 0.5–1.5GB, which is why we count 90%. Plugging your monitor into integrated graphics frees a little more. Past that, you need a second card or offloading to system RAM, which is much slower.</p></div>
   <div class="box row2-b"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
@@ -411,7 +419,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 <!-- Data lives here so it can be lifted into a JSON file for pull requests. -->
 <script id="model-data" type="application/json">
 {
- "updated": "October 29, 2026",
+ "updated": "November 11, 2026",
  "devices": [
   {
    "name": "32GB MacBook Pro",
@@ -488,6 +496,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q8": 4.5,
    "claude": "Haiku 5.5",
    "claudeNote": "overqualified",
+   "chatgpt": "GPT-6 Luna",
    "models": [
     {
      "name": "Qwen3.5-4B",
@@ -508,6 +517,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4": 5.5,
    "q8": 10,
    "claude": "Haiku 5.5",
+   "chatgpt": "GPT-6 Luna",
    "models": [
     {
      "name": "Qwen3.5-9B",
@@ -527,6 +537,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4": 7.5,
    "q8": 13,
    "claude": "Haiku 5.5",
+   "chatgpt": "GPT-6 Luna",
    "models": [
     {
      "name": "Gemma 4 12B",
@@ -548,6 +559,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~14–15GB",
    "q8Label": "~26–28GB",
    "claude": "Haiku 5.5",
+   "chatgpt": "GPT-6 Luna",
    "models": [
     {
      "name": "Gemma 4 26B-A4B",
@@ -555,13 +567,6 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "use": "Fast reasoning on modest hardware.",
      "pop": 2,
      "hf": "https://huggingface.co/google/gemma-4-26B-A4B-it"
-    },
-    {
-     "name": "Devstral Small 2",
-     "lab": "Mistral",
-     "use": "Local coding agents.",
-     "pop": 1,
-     "hf": "https://huggingface.co/mistralai/Devstral-Small-2-24B-Instruct-2512"
     }
    ],
    "gem": {
@@ -576,6 +581,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~17–21GB",
    "q8Label": "~30–38GB",
    "claude": "Haiku 5.5 to Sonnet 5.5",
+   "chatgpt": "GPT-6.1 Terra",
    "models": [
     {
      "name": "Qwen3.8-27B",
@@ -599,25 +605,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "hf": "https://huggingface.co/google/gemma-4-31B-it"
     },
     {
-     "name": "GLM-4.7-Flash",
-     "lab": "Z.ai",
-     "use": "Reasoning and tool use.",
-     "pop": 2,
-     "hf": "https://huggingface.co/zai-org/GLM-4.7-Flash"
-    },
-    {
      "name": "Muse Glimmer 30B",
      "lab": "Meta",
      "use": "Always-on local agents, coding, and document analysis; reads text and images.",
      "pop": 2,
      "hf": "https://huggingface.co/meta-models/Muse-Glimmer-30B"
-    },
-    {
-     "name": "Nemotron 3.5 Lightning",
-     "lab": "NVIDIA",
-     "use": "Long-context agents.",
-     "pop": 1,
-     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4"
     }
    ],
    "gem": {
@@ -631,6 +623,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4": 42,
    "q8": 75,
    "claude": "Sonnet 5.5",
+   "chatgpt": "GPT-6.1 Sol",
    "models": [
     {
      "name": "Apertus 1.5 70B",
@@ -646,11 +639,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    }
   },
   {
-   "size": "~80B",
+   "size": "~74–80B",
    "kind": "MoE",
    "q4": 44,
    "q8": 85,
    "claude": "Sonnet 5.5",
+   "chatgpt": "GPT-6.1 Sol",
    "models": [
     {
      "name": "Qwen3-Coder-Next",
@@ -658,6 +652,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "use": "Agentic coding in harnesses like Claude Code or Cline.",
      "pop": 2,
      "hf": "https://huggingface.co/Qwen/Qwen3-Coder-Next"
+    },
+    {
+     "name": "Nemotron 3.5 Bolt",
+     "lab": "NVIDIA",
+     "use": "Everyday local agents; NVIDIA also ships a 2-bit build that fits a single 24GB card.",
+     "pop": 2,
+     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-BF16"
     }
    ],
    "gem": {
@@ -673,6 +674,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~65–73GB",
    "q8Label": "~125–135GB",
    "claude": "Sonnet 5.5",
+   "chatgpt": "GPT-6.1 Sol",
    "models": [
     {
      "name": "Qwen3.5-122B-A10B",
@@ -682,11 +684,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "hf": "https://huggingface.co/Qwen/Qwen3.5-122B-A10B"
     },
     {
-     "name": "Nemotron 3 Super",
+     "name": "Nemotron 3.5 Super VL",
      "lab": "NVIDIA",
-     "use": "General agent work.",
+     "use": "Vision-language agents: documents, charts, and video, with a 1M-token context.",
      "pop": 2,
-     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+     "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16"
     },
     {
      "name": "Mistral Small 4",
@@ -709,6 +711,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~160–185GB",
    "q8Label": "~310–350GB",
    "claude": "Sonnet 5.5",
+   "chatgpt": "GPT-6.1 Sol",
    "models": [
     {
      "name": "GLM-5.3 Flash",
@@ -723,13 +726,6 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "use": "Cheap, high-volume agent loops and coding. MIT license.",
      "pop": 3,
      "hf": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL"
-    },
-    {
-     "name": "DeepSeek V4 Flash",
-     "lab": "DeepSeek",
-     "use": "Fast, low-cost text automation with a 1M-token context. MIT license.",
-     "pop": 3,
-     "hf": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731"
     }
    ],
    "gem": {
@@ -745,14 +741,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~245–315GB",
    "q8Label": "~470–605GB",
    "claude": "Sonnet 5.5 to Opus 5.5",
+   "chatgpt": "GPT-6.1 Sol to GPT-6 Astra",
    "models": [
-    {
-     "name": "DeepSeek V4.1 Flash",
-     "lab": "DeepSeek",
-     "use": "Agentic coding at volume. Currently the most-used model on OpenRouter; DeepSeek hasn’t fully detailed its architecture.",
-     "pop": 3,
-     "hf": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
-    },
     {
      "name": "MiniMax M3.1 Flash",
      "lab": "MiniMax",
@@ -781,6 +771,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q4Label": "~430–465GB",
    "q8Label": "~830–900GB",
    "claude": "Opus 5.5",
+   "chatgpt": "GPT-6 Astra",
    "models": [
     {
      "name": "GLM-5.3",
@@ -795,6 +786,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
      "use": "Long-horizon coding and agents with a 1M-token context; reads text, images, video, and audio. Tuned for M5 Ultra Mac Studios.",
      "pop": 2,
      "hf": "https://huggingface.co/collections/meta-models/muse-spark-open"
+    },
+    {
+     "name": "DeepSeek V4.1 Flash",
+     "lab": "DeepSeek",
+     "use": "Agentic coding at volume; reads text and images. A 552B backbone plus a 196B lookup memory (Engram) that can be offloaded to system RAM, which would drop it to the ~500B floor. MIT license.",
+     "pop": 3,
+     "hf": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
     }
    ],
    "gem": {
@@ -805,23 +803,25 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   {
    "size": "~1T",
    "kind": "MoE",
-   "q4": 550,
+   "q4": 600,
    "q8": 1100,
    "q8Label": "~1.1TB",
    "claude": "Opus 5.5",
+   "chatgpt": "GPT-6 Astra",
    "models": [
     {
-     "name": "Kimi K2.7 Code",
-     "lab": "Moonshot AI",
-     "use": "Long-horizon agentic coding. Superseded by K3 for most uses.",
-     "pop": 1,
-     "hf": "https://huggingface.co/moonshotai/Kimi-K2.7-Code"
+     "name": "Mistral Large 4",
+     "lab": "Mistral",
+     "use": "Mistral’s flagship: coding and agents with a 1M-token context; reads text and images.",
+     "pop": 2,
+     "hf": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B"
     }
    ],
    "gem": {
     "name": "Diamond",
     "color": "url(#g-diamond)"
-   }
+   },
+   "q4Label": "~550–600GB"
   },
   {
    "size": "~2.8T",
@@ -830,14 +830,15 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "q8": 3000,
    "q4Label": "~1.56TB",
    "q8Label": "~3TB",
-   "claude": "Opus 5.5 to Fable 5.1",
+   "claude": "Opus 5.5 to Fable 5.2",
+   "chatgpt": "GPT-6 Astra",
    "models": [
     {
-     "name": "Kimi K3",
+     "name": "Kimi K3.1 Pro",
      "lab": "Moonshot AI",
-     "use": "Frontier-class reasoning and multimodal agents with a 1M-token context. Datacenter hardware only, under a restrictive commercial license.",
+     "use": "Frontier-class agentic coding and multimodal reasoning with a 1M-token context. Datacenter hardware only; modified-MIT license with extra terms for large commercial services.",
      "pop": 2,
-     "hf": "https://huggingface.co/moonshotai/Kimi-K3"
+     "hf": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro"
     }
    ],
    "gem": {
@@ -848,8 +849,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   {
    "size": "Restricted",
    "restricted": true,
-   "claude": "Fable 5.1",
+   "claude": "Fable 5.2",
    "claudeNote": "Mythos tier",
+   "chatgpt": "GPT-6 Cyber",
+   "chatgptNote": "Restricted access",
+   "chatgptTip": "We’re not entirely sure this is an official name: so far only one report uses it.",
    "models": [
     {
      "name": "No open-weight equivalent yet",
@@ -964,7 +968,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       <div class="size">${esc(l.size)}<small>${lvl(i)}${l.kind ? " " + esc(l.kind) : ""}</small>${gem(l.gem)}</div>
       <div class="models">${models}</div>
       ${mem}
-      <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}</div>
+      <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}<small class="next">Comparable ChatGPT</small>${esc(l.chatgpt)}${l.chatgptTip ? `<span class="star" tabindex="0" aria-label="Note">*<span class="star-tip" role="tooltip">${esc(l.chatgptTip)}</span></span>` : ""}${l.chatgptNote ? `<small>${esc(l.chatgptNote)}</small>` : ""}</div>
     </article>`;
     if (stopsAfter[i]) html += stopsAfter[i].sort((a, b) => a.key - b.key).map(st => st.html).join("");
     html += `<div class="you-slot" data-after="${i}"></div>`;

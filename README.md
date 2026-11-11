@@ -33,6 +33,7 @@ GPU preset (NVIDIA green, AMD red) and stay orange otherwise.
 | **Models** | Notable open-weight releases from the past year at that size, linked to Hugging Face |
 | **🏢 Data center** | How many 80GB H100s or ~180GB B200s hold the 8-bit (FP8) weights, at 90% usable per card (minimums, not deployment-shaped counts) |
 | **Comparable Claude model** | The Claude tier you'd reach for on the same kind of task (not a claim of equal performance) |
+| **Comparable ChatGPT model** | The same idea for OpenAI's API tiers (GPT-6 Luna, GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Astra) |
 | **Popularity** | A rough three-step signal from OpenRouter token usage and Hugging Face downloads |
 | **Gem** | Decoration. It's a mine shaft, so gems get roughly pricier the deeper you go (quartz to red diamond, then antimatter). They say nothing about the model |
 
