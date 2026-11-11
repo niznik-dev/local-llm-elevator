@@ -7,16 +7,16 @@ gaming GPU.
 
 Models are drawn as floors in an elevator shaft: small models sit near the surface and the giants
 are far below. Every machine's elevator only goes so deep, and its **stop** marks where it runs out of
-memory. The shaft's built-in stops are reference Macs; add your own in two steps:
+memory. The shaft's built-in stops are reference machines (Macs and mini PCs in Unified mode, graphics cards in VRAM mode); add your own in two steps:
 
 1. **Pick a memory type:** Unified or GPU VRAM (the **?** explains the difference).
-2. **Pick a preset or type your own amount:** 🍎 Macs for unified, 🎮 gaming cards for VRAM. Press
+2. **Pick a preset or type your own amount:** 🍎 Macs or a mini PC (Strix Halo, DGX Spark) for unified, 🎮 gaming cards for VRAM. Press
    Enter or ↓ to ride down to your stop; **Clear** removes it.
 
 | Mode | Enter | Usable estimate |
 |---|---|---|
 | **Unified** | Total RAM on Apple Silicon or another shared-memory machine (AMD Strix Halo, NVIDIA DGX Spark) | ~67% (≤36GB) or ~75%, leaving room for the OS and a few apps |
-| **GPU VRAM** | A dedicated GPU's VRAM, summed across cards (presets, one per size: RTX 5060 8GB, RTX 5070 12GB, RX 9070 XT 16GB, RX 7900 XTX 24GB, RTX 5090 32GB) | ~90%, after driver and display overhead |
+| **GPU VRAM** | A dedicated GPU's VRAM, summed across cards (presets: RX 9060 XT 8GB, RTX 5070 12GB, RX 9070 XT 16GB, RTX 3090 24GB, RTX 5090 32GB, with a 1× / 2× / 4× card count; counts a card isn't usually combined at are greyed out) | ~90%, after driver and display overhead |
 
 VRAM mode assumes the whole model fits on the GPU. Partial offload to system RAM (llama.cpp layer
 splitting, MoE experts on CPU) is out of scope.
@@ -36,7 +36,7 @@ GPU preset (NVIDIA green, AMD red) and stay orange otherwise.
 | **Popularity** | A rough three-step signal from OpenRouter token usage and Hugging Face downloads |
 | **Gem** | Decoration. It's a mine shaft, so gems get roughly pricier the deeper you go (quartz to red diamond, then antimatter). They say nothing about the model |
 
-Reference stops are shown for 32GB and 64GB MacBook Pros (💻) and 128 / 256 / 512GB Mac Studios (🗄️). A
+Reference stops are shown for 32GB and 64GB MacBook Pros (💻) and 128 / 256 / 512GB Mac Studios (🤍 🩶 🖤), plus 128GB Strix Halo (❤️) and DGX Spark (💚) mini PCs, which take turns with the 128GB Studio in the fit pills. In VRAM mode those stops swap out for one per GPU preset, plus a stop for every multi-card count the selector allows (2× RX 9070 XT; 2× and 4× RTX 3090 and 5090). A
 **solid** box is the last floor that fits; a **dashed** box is the recommended stop if you want to keep
 other apps open.
 

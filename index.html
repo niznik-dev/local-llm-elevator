@@ -129,6 +129,14 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .go:focus-visible,.presets button:focus-visible{outline:3px solid var(--q4); outline-offset:2px}
 .presets{display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.6rem}
 .presets button{font:600 .8rem var(--mono); padding:.25rem .55rem; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center}
+.cards{position:relative; display:flex; align-items:center; gap:.5rem; margin-top:.5rem}
+.cards[hidden]{display:none}
+.cards .preset-label,.cards .presets{margin:0}
+/* Greyed out but still focusable, so hover, keyboard, and tap can all show why. */
+#cards button[aria-disabled="true"]{color:color-mix(in srgb, var(--ink) 35%, transparent); border-style:dashed; cursor:not-allowed}
+#cards button[aria-disabled="true"]:is(:hover,:focus)::after{content:attr(data-why); position:absolute; left:0; top:calc(100% + 6px); z-index:30;
+  width:max-content; max-width:min(18rem, 100%); background:var(--panel); color:#E6E9EC; font:400 .78rem/1.4 var(--sans); text-align:left;
+  padding:.45rem .65rem; border-radius:6px; border:1px solid var(--hazard); box-shadow:0 8px 24px rgba(0,0,0,.35); pointer-events:none}
 .presets button[aria-pressed="true"]{border-color:var(--ink); background:var(--paper); box-shadow:inset 0 -3px 0 var(--hazard)}
 @keyframes flash{0%,100%{box-shadow:0 0 0 0 transparent} 30%{box-shadow:0 0 0 6px color-mix(in srgb, var(--you) 45%, transparent)}}
 .stop.flash{animation:flash 1.2s ease-out 2}
@@ -209,6 +217,14 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .val{text-align:right; font:600 .78rem var(--mono); font-variant-numeric:tabular-nums}
 .fits{display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.2rem}
 .fits span{border-radius:4px; padding:.05rem .45rem; font-weight:600; font-size:.74rem; border:1px solid var(--line)}
+/* Machines that share a memory size take turns in one slot, so none reads as the default. */
+.fits span:has(> .rotor){display:inline-flex; align-items:center; gap:.3rem}
+.fits .rotor{display:inline-grid; padding:0; border:0}
+.fits .rotor>*{grid-area:1/1; place-self:center; margin:0; font-style:normal; font-size:.9em; line-height:1; opacity:0; animation:rotor 4.5s infinite}
+.rotor>:nth-child(2){animation-delay:-3s}
+.rotor>:nth-child(3){animation-delay:-1.5s}
+@keyframes rotor{0%,30%{opacity:1} 34%,96%{opacity:0} 100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.fits .rotor{display:inline-flex; width:auto; gap:.2rem; align-items:center} .fits .rotor>*{animation:none; opacity:1}}
 .aside{flex-basis:100%; font-size:.8rem; font-style:italic}
 .aside b{font-style:normal; font-weight:600; color:var(--ink)}
 .dc{font-size:.74rem; color:var(--ink-soft)}
@@ -230,6 +246,7 @@ h1{font-family:var(--sign); font-weight:800; font-size:clamp(2.6rem,7vw,4.8rem);
 .stop::before{content:""; position:absolute; left:-58px; top:50%; width:32px; height:4px; margin-top:-2px; border-radius:2px; background:var(--c)}
 .stop.last{border:2px solid var(--c); background:var(--cs)}
 .stop.rec{border:2px dashed var(--c); background:var(--paper); font-weight:500}
+:root[data-kind="unified"] :is(.stop,.aside)[data-kind="vram"],:root[data-kind="vram"] :is(.stop,.aside)[data-kind="unified"]{display:none}
 
 /* floating indicator */
 .indicator{position:fixed; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--panel); border:2px solid #2E343A;
@@ -294,7 +311,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   <div>
     <p class="kicker">A field guide to running open-weight LLMs locally</p>
     <h1>How deep can your machine go?</h1>
-    <p class="lede">Open-weight language models released in the past year, arranged as floors in an elevator shaft. Small models live near the surface; the giants are far below. Every machine’s elevator only goes so deep. The stops show where a few reference Macs run out of memory, and you can add your own even if it’s not a Mac!</p>
+    <p class="lede">Open-weight language models released in the past year, arranged as floors in an elevator shaft. Small models live near the surface; the giants are far below. Every machine’s elevator only goes so deep. The stops show where a few reference Macs, mini PCs, and graphics cards run out of memory, and you can add your own!</p>
     <div class="updated" id="updated"></div>
   </div>
   <div class="dial" aria-hidden="true">
@@ -332,6 +349,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
           <p class="step-t" id="ramLabel">How much unified memory?</p>
           <p class="preset-label" id="presetLabel">Pick a 🍎 Mac</p>
           <div class="presets" id="presets" role="group" aria-labelledby="presetLabel"></div>
+          <div class="cards" id="cardsRow" hidden>
+            <span class="preset-label" id="cardsLabel">How many cards?</span>
+            <div class="presets" id="cards" role="group" aria-labelledby="cardsLabel">
+              <button type="button" data-n="1" aria-pressed="true">1×</button><button type="button" data-n="2" aria-pressed="false">2×</button><button type="button" data-n="4" aria-pressed="false">4×</button>
+            </div>
+          </div>
           <label class="preset-label" for="ram">…or type your own</label>
           <div class="ram">
             <input id="ram" type="number" autocomplete="off" inputmode="numeric" min="4" max="1024" step="4" placeholder="e.g. 48">
@@ -353,7 +376,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       <span><a class="hf" tabindex="-1" aria-hidden="true">HF</a> Opens on Hugging Face</span>
       <span>Solid box: last stop. Dashed box: recommended stop for multitasking.</span>
       <span class="dev" id="devLegend"></span>
-      <span class="aside"><b>Why a filing cabinet?</b> Unicode has no Mac Studio emoji. This was the closest match: a squat metal box that lives by your desk and holds a frankly alarming amount of weights.</span>
+      <span class="aside" data-kind="unified"><b>Why hearts?</b> Unicode has no Mac Studio emoji, so the Studios get hearts shaded like their stops: 🤍 🩶 🖤. At 128GB they take turns with ❤️ Strix Halo and 💚 DGX Spark. Every machine here is loved equally; some just hold more.</span>
+      <span class="aside" data-kind="vram"><b>Why a 3090 from 2020?</b> It’s still the home-LLM workhorse: 24GB per card, plentiful on the used market, and far cheaper than the hard-to-find RTX 5090. Stack two or four and you reach floors no single gaming card can.</span>
       <span class="aside"><b>Why gems?</b> It’s a mine shaft, so digging deeper ought to turn up something shinier. They run roughly from cheapest to priciest, quartz to red diamond, with one exhibit at the bottom that no mine has produced. They’re decoration only: a gem says nothing about a model, and real gem prices swing too much with quality for the order to be more than loose.</span>
       <span class="aside"><b>That’s… a Chaos Emerald!</b> Sorry, we’re not playing Sonic right now. It’s a plain emerald on B10, and collecting all seven won’t make your GPU go Super.</span>
     </div>
@@ -409,7 +433,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   },
   {
    "name": "128GB Mac Studio",
-   "short": "128GB 🗄️",
+   "short": "128GB 🤍",
    "ram": 128,
    "usable": 96,
    "raised": 120,
@@ -418,7 +442,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   },
   {
    "name": "256GB Mac Studio",
-   "short": "256GB 🗄️",
+   "short": "256GB 🩶",
    "ram": 256,
    "usable": 192,
    "raised": 240,
@@ -427,7 +451,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   },
   {
    "name": "512GB Mac Studio",
-   "short": "512GB 🗄️",
+   "short": "512GB 🖤",
    "ram": 512,
    "usable": 384,
    "raised": 480,
@@ -435,12 +459,21 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "color": "d512"
   }
  ],
+ "minis": [
+  {"name": "128GB Strix Halo mini PC", "short": "Strix Halo", "icon": "❤️", "vendor": "amd", "ram": 128, "usable": 96,
+   "note": "About 96GB usable by the GPU, the most Windows allows; Linux can go a little higher."},
+  {"name": "DGX Spark", "short": "DGX Spark", "icon": "💚", "vendor": "nvidia", "ram": 128, "usable": 96,
+   "note": "No fixed split: the GPU can use whatever the OS isn’t, so plan on about 96GB."}
+ ],
  "gpus": [
-  {"short": "RTX 5060", "vendor": "nvidia", "vram": 8},
-  {"short": "RTX 5070", "vendor": "nvidia", "vram": 12},
-  {"short": "RX 9070 XT", "vendor": "amd", "vram": 16},
-  {"short": "RX 7900 XTX", "vendor": "amd", "vram": 24},
-  {"short": "RTX 5090", "vendor": "nvidia", "vram": 32}
+  {"name": "an RX 9060 XT", "short": "RX 9060 XT", "vendor": "amd", "vram": 8, "max": 1,
+   "why": "8GB cards are rarely combined: one bigger card goes further for the money."},
+  {"name": "an RTX 5070", "short": "RTX 5070", "vendor": "nvidia", "vram": 12, "max": 1,
+   "why": "12GB cards are rarely combined: one bigger card goes further for the money."},
+  {"name": "an RX 9070 XT", "short": "RX 9070 XT", "vendor": "amd", "vram": 16, "max": 2, "rigStops": true,
+   "why": "Few people run four of these: AMD’s multi-card support for this generation is still young."},
+  {"name": "an RTX 3090", "short": "RTX 3090", "vendor": "nvidia", "vram": 24, "max": 4, "rigStops": true},
+  {"name": "an RTX 5090", "short": "RTX 5090", "vendor": "nvidia", "vram": 32, "max": 4, "rigStops": true}
  ],
  "datacenter": [
   {"short": "H100", "vram": 80, "url": "https://en.wikipedia.org/wiki/Hopper_(microarchitecture)"},
@@ -848,7 +881,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 
   $("updated").textContent = "Last updated " + D.updated;
   $("levelCount").textContent = lvl(D.levels.length - 1);
-  $("devLegend").innerHTML = "🍎 Reference Macs: " + D.devices.map(d => `<i class="dot" style="background:var(--${d.color})"></i>${esc(d.short)}`).join(" &nbsp; ");
+  const LEGEND = {
+    unified: "🍎 Reference Macs: " + D.devices.map(d => `<i class="dot" style="background:var(--${d.color})"></i>${esc(d.short)}`).join(" &nbsp; ")
+      + " &nbsp;·&nbsp; Mini PCs: " + D.minis.map(m => `<i class="dot ${m.vendor}"></i>${esc(m.short)}`).join(" &nbsp; "),
+    vram: "🎮 Reference GPUs: " + D.gpus.map(g => `<i class="dot ${g.vendor}"></i>${esc(g.short)}`).join(" &nbsp; ")
+  };
 
   // Dedicated VRAM only loses the driver context and display buffers; unified memory shares with the OS and apps.
   const VRAM_USABLE = 0.9;
@@ -857,9 +894,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 
   function smallest(v){
     for (const d of D.devices){
-      const dot = `<i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>`;
-      if (v <= d.usable) return {cls:"ok", text:dot + d.short};
-      if (v <= d.raised) return {cls:"meh", text:dot + d.short + ", raised limit"};
+      const twins = D.minis.filter(m => m.ram === d.ram);
+      // Same-size machines cycle their dots and icons in step, so the pill reads "● 128GB 🤍" one machine at a time.
+      const label = !twins.length ? `<i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}`
+        : `<span class="rotor" role="img" aria-label="${esc([d.name, ...twins.map(m => m.short)].join(", "))}"><i class="dot" style="background:var(--${d.color})"></i>${twins.map(m => `<i class="dot ${m.vendor}"></i>`).join("")}</span>`
+          + `${d.ram}GB<span class="rotor" aria-hidden="true"><i>${esc(d.short.split(" ").pop())}</i>${twins.map(m => `<i>${m.icon}</i>`).join("")}</span>`;
+      if (v <= d.usable) return {cls:"ok", text:label};
+      if (v <= d.raised) return {cls:"meh", text:label + ", raised limit"};
     }
     return {cls:"no", text:"Bigger than any single Mac"};
   }
@@ -871,13 +912,25 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     return idx;
   }
   const stopsAfter = {};
-  const addStop = (i, html) => { if (i < 0) return; (stopsAfter[i] = stopsAfter[i] || []).push(html); };
+  // key = total memory; stops sharing a floor list smallest first (stable sort keeps REC before LAST).
+  const addStop = (i, html, key) => { if (i < 0) return; (stopsAfter[i] = stopsAfter[i] || []).push({html, key}); };
   for (const d of D.devices){
     if (d.laptop){
       const comfy = d.ram - D.appsReserveGB - D.contextReserveGB;
-      addStop(deepestFit(comfy), `<div class="stop rec" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">REC</span><div>Recommended stop for a ${esc(d.name)} <small>Leaves about ${D.appsReserveGB}GB for your apps and ${D.contextReserveGB}GB for context (weights up to ~${comfy}GB).</small></div></div>`);
+      addStop(deepestFit(comfy), `<div class="stop rec" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">REC</span><div>Recommended stop for a ${esc(d.name)} <small>Leaves about ${D.appsReserveGB}GB for your apps and ${D.contextReserveGB}GB for context (weights up to ~${comfy}GB).</small></div></div>`, d.ram);
     }
-    addStop(deepestFit(d.raised), `<div class="stop last" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`);
+    addStop(deepestFit(d.raised), `<div class="stop last" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`, d.ram);
+  }
+  const COUNTS = [1, 2, 4], COUNT_WORDS = {2:"two", 4:"four"};
+  for (const g of D.gpus){
+    for (const n of g.rigStops ? COUNTS.filter(n => n <= g.max) : [1]){
+      const vram = g.vram * n, usable = Math.floor(vram * VRAM_USABLE);
+      const who = n === 1 ? g.name : `${COUNT_WORDS[n]} ${g.short}s`;
+      addStop(deepestFit(usable), `<div class="stop last" data-kind="vram" style="--c:var(--${g.vendor});--cs:color-mix(in srgb, var(--${g.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for ${esc(who)} <small>${vram}GB of VRAM, about ${usable}GB usable after driver and display overhead.</small></div></div>`, vram);
+    }
+  }
+  for (const m of D.minis){
+    addStop(deepestFit(m.usable), `<div class="stop last" data-kind="unified" style="--c:var(--${m.vendor});--cs:color-mix(in srgb, var(--${m.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(m.name)} <small>${esc(m.note)}</small></div></div>`, m.ram);
   }
 
   const ticks = D.devices.map(d => `<span class="tick" style="left:${pct(d.ram)}%;background:var(--${d.color})"></span>`).join("");
@@ -913,7 +966,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       ${mem}
       <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}</div>
     </article>`;
-    if (stopsAfter[i]) html += stopsAfter[i].join("");
+    if (stopsAfter[i]) html += stopsAfter[i].sort((a, b) => a.key - b.key).map(st => st.html).join("");
     html += `<div class="you-slot" data-after="${i}"></div>`;
   });
   $("shaft").innerHTML = html;
@@ -923,20 +976,41 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   const memKind = $("memKind"), memHint = $("memHint"), ramLabel = $("ramLabel"), presetLabel = $("presetLabel");
   const KINDS = {
     unified: {
-      label:"How much unified memory?", noun:"of unified memory", presetLabel:"Pick a 🍎 Mac",
+      label:"How much unified memory?", noun:"of unified memory", presetLabel:"Pick a 🍎 Mac or a mini PC",
       hint:"The CPU and GPU share one pool: Apple Silicon Macs, AMD Strix Halo, NVIDIA DGX Spark.",
       presets:() => D.devices.map(d => `<button type="button" data-ram="${d.ram}" aria-pressed="false"><i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}</button>`)
+        .concat(D.minis.map(m => `<button type="button" data-ram="${m.ram}" data-vendor="${m.vendor}" aria-pressed="false"><i class="dot ${m.vendor}" aria-hidden="true"></i>${esc(m.short)}&nbsp;<small>${m.ram}GB</small></button>`))
     },
     vram: {
       label:"How much VRAM?", noun:"of VRAM",
       presetLabel:`Pick a 🎮 gaming GPU <span class="vendor-key">(<i class="dot nvidia" aria-hidden="true"></i>NVIDIA <i class="dot amd" aria-hidden="true"></i>AMD)</span>`,
-      hint:"A separate graphics card; with several, add them up. Assumes the whole model fits on the GPU, with no offloading to system RAM.",
-      presets:() => D.gpus.map(g => `<button type="button" data-ram="${g.vram}" data-vendor="${g.vendor}" aria-pressed="false"><i class="dot ${g.vendor}" aria-hidden="true"></i>${esc(g.short)}&nbsp;<small>${g.vram}GB</small></button>`)
+      hint:"A separate graphics card; with several of the same card, pick how many, or type the total. Assumes the whole model fits on the GPU, with no offloading to system RAM.",
+      presets:() => D.gpus.map(g => `<button type="button" data-ram="${g.vram}" data-max="${g.max}" data-why="${esc(g.why || "")}" data-vendor="${g.vendor}" aria-pressed="false"><i class="dot ${g.vendor}" aria-hidden="true"></i>${esc(g.short)}&nbsp;<small>${g.vram}GB</small></button>`)
     }
   };
-  let kind = "unified";
+  let kind = "unified", cards = 1, pickedCard = null;
+  const cardsRow = $("cardsRow"), cardBtns = [...$("cards").querySelectorAll("button")];
+  // Counts past a card's max grey out; cards that are rarely combined have max 1.
+  function syncCards(){
+    const max = pickedCard ? +pickedCard.dataset.max : 1;
+    cardBtns.forEach(b => {
+      const off = +b.dataset.n > max;
+      b.setAttribute("aria-disabled", off ? "true" : "false");
+      b.dataset.why = !off ? "" : pickedCard ? pickedCard.dataset.why : "Pick a card above first.";
+      if (off) b.setAttribute("aria-description", b.dataset.why); else b.removeAttribute("aria-description");
+      b.setAttribute("aria-pressed", +b.dataset.n === cards ? "true" : "false");
+    });
+  }
+  $("cards").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.getAttribute("aria-disabled") === "true" || !pickedCard) return;
+    cards = +b.dataset.n;
+    ramIn.value = pickedCard.dataset.ram * cards; updateYou(pickedCard);
+  });
   function setKind(k){
     kind = k;
+    cardsRow.hidden = k !== "vram";
+    document.documentElement.dataset.kind = k;
+    $("devLegend").innerHTML = LEGEND[k];
     memKind.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.kind === k ? "true" : "false"));
     ramLabel.textContent = KINDS[k].label;
     memHint.textContent = KINDS[k].hint;
@@ -956,7 +1030,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   });
   presets.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    ramIn.value = b.dataset.ram; updateYou(b);
+    if (kind === "vram") cards = Math.max(...COUNTS.filter(n => n <= Math.min(cards, +b.dataset.max)));
+    ramIn.value = b.dataset.ram * (kind === "vram" ? cards : 1); updateYou(b);
   });
   go.addEventListener("click", () => {
     const stop = document.querySelector(".you-slot .stop");
@@ -980,6 +1055,9 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   }
   // Track the clicked button, not the value: two GPUs can share a VRAM size.
   function updateYou(picked){
+    pickedCard = kind === "vram" && picked || null;
+    if (!pickedCard) cards = 1;
+    syncCards();
     presets.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === picked ? "true" : "false"));
     document.documentElement.dataset.rider = picked?.dataset.vendor || "mac";
     go.disabled = true;
@@ -995,7 +1073,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     const i = deepestFit(usable);
     if (i < 0){ ramOut.textContent = `About ${usable}GB usable: smaller than the first level here, so look for models under 4B.`; return; }
     const slot = document.querySelector(`.you-slot[data-after="${i}"]`);
-    slot.innerHTML = `<div class="stop last" style="--c:var(--you);--cs:var(--yous)" role="note"><span class="chip">YOU</span><div>Your elevator’s last stop <small>${ram}GB ${KINDS[kind].noun}, about ${usable}GB usable by the GPU${kind === "unified" ? " by default" : ""}.</small></div></div>`;
+    slot.innerHTML = `<div class="stop last" style="--c:var(--you);--cs:var(--yous)" role="note"><span class="chip">YOU</span><div>Your elevator’s last stop <small>${ram}GB ${KINDS[kind].noun}${cards > 1 ? ` across ${cards} cards` : ""}, about ${usable}GB usable by the GPU${kind === "unified" ? " by default" : ""}.</small></div></div>`;
     ramOut.textContent = `About ${usable}GB usable: you can reach ${lvl(i)} (${D.levels[i].size}).`;
     go.disabled = false;
     setYouFloor(i);
