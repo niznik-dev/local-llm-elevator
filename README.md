@@ -27,7 +27,8 @@ GPU preset (NVIDIA green, AMD red) and stay orange otherwise.
 
 A money-green **hardware value** box floats above the floor tracker: the US price of the preset you
 picked (times the card count), or, for a typed amount, an estimate from the cheapest preset's $/GB.
-Hover it for where the number comes from.
+GPU picks add a small line estimating the rest of the machine (PC, workstation, or server, by card
+count). Hover it for where the number comes from.
 
 ## What's on each floor
 
@@ -35,8 +36,8 @@ Hover it for where the number comes from.
 |---|---|
 | **Q4 / Q8 memory** | Approximate weight footprint at 4-bit and 8-bit quantization |
 | **Models** | Notable open-weight releases from the past year at that size, linked to Hugging Face |
-| **Fit pills** | The smallest reference machine that holds the Q4 / Q8 weights. Unified mode names Macs and mini PCs; VRAM mode names card setups with their total VRAM. Setups with equal room take turns |
-| **Cheapest option** | The least expensive setup that holds the Q4 weights at default limits, within the current memory mode (a card isn't compared to a whole computer) |
+| **Fit pills** | The smallest reference machine that holds the Q4 / Q8 weights. Unified mode names Macs and mini PCs; VRAM mode names card setups with their total VRAM. Setups with equal room take turns. Past a single Mac, clustered 512GB Studios (Thunderbolt 5 RDMA, macOS 26.2+) appear as dashed *theoretical* pills |
+| **Cheapest option** | The least expensive setup that holds the Q4 weights at default limits, within the current memory mode (a card isn't compared to a whole computer). GPU setups rank by cards plus host machine and show both, e.g. `$2,400 + ~$2,000 for the PC`; Mac clusters are marked theoretical |
 | **🏢 Data center** | How many 80GB H100s or ~180GB B200s hold the 8-bit (FP8) weights, at 90% usable per card (minimums, not deployment-shaped counts) |
 | **Comparable Claude model** | The Claude tier you'd reach for on the same kind of task (not a claim of equal performance) |
 | **Comparable ChatGPT model** | The same idea for OpenAI's API tiers (GPT-6 Luna, GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Astra) |
@@ -76,9 +77,10 @@ All model and device data lives in a JSON block inside `index.html`:
 | Key | Holds |
 |---|---|
 | `"levels"` | Each floor: size, Q4/Q8 memory, models, comparable Claude and ChatGPT models, gem |
-| `"devices"` | Reference Mac stops: usable / raised GPU memory and `price` |
+| `"devices"` | Reference Mac stops: usable / raised GPU memory, `price`, and an optional `cluster` list of theoretical Thunderbolt 5 cluster sizes (pills and cheapest line only, no stops) |
 | `"minis"` | Unified mini PCs (Strix Halo, DGX Spark): usable memory, `icon`, `price` |
 | `"gpus"` | VRAM presets: `vendor` (`nvidia` or `amd`) for the dot and shirt color, `price` per card, `max` cards (with a `why` tooltip for greyed-out counts), `rigStops`, and an optional `showoff` count |
+| `"hosts"` | Rough cost of the machine around 1, 2, 4, or 8 GPUs (PC, workstation, server) |
 | `"datacenter"` | Cards for the 🏢 line, with a `url` for each name's link |
 
 To add a model, append it to the matching level's `models` array; to change the memory budget

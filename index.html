@@ -262,7 +262,7 @@ body{overflow-x:clip}
 .dc b{font-family:var(--mono); color:var(--ink)}
 .dc a{color:inherit; text-decoration:underline dotted; text-underline-offset:2px}
 .dc a:hover{color:var(--ink); text-decoration-style:solid}
-.ok{background:var(--ok-soft)} .meh{background:var(--warn-soft)} .no{background:var(--no-soft); color:var(--ink-soft)}
+.ok{background:var(--ok-soft)} .fits .theory{border-style:dashed} .meh{background:var(--warn-soft)} .no{background:var(--no-soft); color:var(--ink-soft)}
 .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.3rem}
 .claude{font-size:.88rem; font-weight:600; border-left:2px solid var(--line); padding-left:.8rem}
 .claude small{display:block; font-weight:400; color:var(--ink-soft); font-size:.74rem}
@@ -297,6 +297,8 @@ body{overflow-x:clip}
 .price{display:none; max-width:13rem}
 .hud:has(.indicator.show) .price.on{display:block; opacity:1; transform:none}
 .price .sub{line-height:1.35}
+.hud .price .host{font-size:.66rem; color:#8C949C; margin-top:.15rem}
+.hud .price .host:empty{display:none}
 .price{--money:#85BB65; border-color:color-mix(in srgb, var(--money) 45%, #2E343A); position:relative}
 .price.on{pointer-events:auto; cursor:help}
 .hud .price .big{color:var(--money)}
@@ -458,6 +460,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   <div class="big" id="priceVal"></div>
   <div class="sub" id="priceSub"></div>
   <div class="sub" id="priceMem"></div>
+  <div class="sub host" id="priceHost"></div>
 </div>
 <div class="indicator" id="indicator" aria-hidden="true">
   <div>
@@ -522,7 +525,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "usable": 384,
    "raised": 480,
    "laptop": false,
-   "color": "d512"
+   "color": "d512",
+   "cluster": [2, 4]
   }
  ],
  "minis": [
@@ -542,6 +546,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   {"name": "an RTX 5090", "short": "RTX 5090", "vendor": "nvidia", "vram": 32, "max": 4, "price": 6900, "rigStops": true, "showoff": 8,
    "showoffNote": "Not in the picker, because that’s about 4.6kW of graphics cards. At this point you own a space heater that does inference."}
  ],
+ "hosts": {
+  "1": {"price": 1000, "what": "PC"},
+  "2": {"price": 2000, "what": "PC"},
+  "4": {"price": 4500, "what": "workstation"},
+  "8": {"price": 12000, "what": "server"}
+ },
  "datacenter": [
   {"short": "H100", "vram": 80, "url": "https://en.wikipedia.org/wiki/Hopper_(microarchitecture)"},
   {"short": "B200", "vram": 180, "url": "https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)"}
@@ -965,7 +975,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       if (v <= d.usable) return {cls:"ok", text:label};
       if (v <= d.raised) return {cls:"meh", text:label + ", raised limit"};
     }
-    return {cls:"no", text:"Bigger than any single Mac"};
+    // Thunderbolt 5 clusters (RDMA, macOS 26.2+) can pool Studios; shown as theoretical, never as a stop or preset.
+    for (const d of D.devices) for (const n of d.cluster || []){
+      if (v <= d.usable * n) return {cls:"ok theory", text:`<i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${n}× ${esc(d.short)}&nbsp;<small>theoretical</small>`};
+    }
+    return {cls:"no", text:"Beyond even a Mac cluster"};
   }
 
   // Work out where each stop goes: after the deepest level that fits.
@@ -997,15 +1011,19 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   }
   // VRAM-mode pills: the smallest setup that fits; setups with equal room take turns.
   const RIGS = D.gpus.flatMap(g => countsFor(g).map(n => ({
-    label: (n > 1 ? `${n}× ` : "") + g.short, gb: g.vram * n, hot: n === g.showoff, vendor: g.vendor, usable: Math.floor(g.vram * n * VRAM_USABLE), price: g.price * n
+    label: (n > 1 ? `${n}× ` : "") + g.short, gb: g.vram * n, hot: n === g.showoff, vendor: g.vendor, usable: Math.floor(g.vram * n * VRAM_USABLE), price: g.price * n, n
   }))).sort((a, b) => a.usable - b.usable);
   // Cheapest way to hold a floor's Q4 weights, within one kind of memory (default limits, no tuning).
   const UNI = [...D.devices.map(d => ({label:d.name, usable:d.usable, price:d.price, gb:d.ram})),
-    ...D.minis.map(m => ({label:m.short, usable:m.usable, price:m.price, gb:m.ram}))];
+    ...D.minis.map(m => ({label:m.short, usable:m.usable, price:m.price, gb:m.ram})),
+    ...D.devices.flatMap(d => (d.cluster || []).map(n => ({label:`${n}× ${d.name}`, usable:d.usable * n, price:d.price * n, gb:d.ram * n, theory:true})))];
   function cheapest(k, v){
-    const best = (k === "unified" ? UNI : RIGS).filter(o => o.usable >= v && o.price).sort((a, b) => a.price - b.price)[0];
-    const inner = !best ? (k === "unified" ? "No single machine" : "Needs a data center")
-      : `<b>${esc(best.label)}</b>${/\d+GB/.test(best.label) ? "" : `&nbsp;<small>${best.gb}GB</small>`}${best.hot ? "&nbsp;🔥" : ""} · <span class="usd">$${best.price.toLocaleString("en-US")}</span>`;
+    // GPU setups rank by cards plus the machine around them, then show the two parts separately.
+    const host = o => D.hosts[o.n] || {price:0, what:""};
+    const total = o => o.price + (k === "vram" ? host(o).price : 0);
+    const best = (k === "unified" ? UNI : RIGS).filter(o => o.usable >= v && o.price).sort((a, b) => total(a) - total(b))[0];
+    const inner = !best ? (k === "unified" ? "No single machine, or even four" : "Needs a data center")
+      : `<b>${esc(best.label)}</b>${/\d+GB/.test(best.label) ? "" : `&nbsp;<small>${best.gb}GB</small>`}${best.hot ? "&nbsp;🔥" : ""} · <span class="usd">$${best.price.toLocaleString("en-US")}</span>${k === "vram" ? ` <small>+ ~$${host(best).price.toLocaleString("en-US")} for the ${host(best).what}</small>` : ""}${best.theory ? " <small>(theoretical: a Thunderbolt 5 cluster)</small>" : ""}`;
     return `<div class="cheap" data-kind="${k}">Cheapest option: ${inner}</div>`;
   }
   function smallestRig(v){
@@ -1165,13 +1183,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   const priceBox = $("price");
   function priceOptions(){
     if (kind === "unified") return [...D.devices.map(d => ({gb:d.ram, price:d.price, what:d.name})), ...D.minis.map(m => ({gb:m.ram, price:m.price, what:m.short}))];
-    return D.gpus.flatMap(g => COUNTS.filter(n => n <= g.max).map(n => ({gb:g.vram * n, price:g.price * n, what:(n > 1 ? `${n}× ` : "") + g.short})));
+    return D.gpus.flatMap(g => COUNTS.filter(n => n <= g.max).map(n => ({gb:g.vram * n, price:g.price * n, n, what:(n > 1 ? `${n}× ` : "") + g.short})));
   }
   function showPrice(ram, picked){
-    let val, sub, tip;
+    let val, sub, tip, hostN = 0;
     if (picked?.dataset.price){
       const n = kind === "vram" ? cards : 1;
-      val = picked.dataset.price * n;
+      val = picked.dataset.price * n; hostN = kind === "vram" ? n : 0;
       sub = (n > 1 ? `${n}× ` : "") + picked.dataset.what;
       tip = picked.dataset.est ? "Rough estimate: we couldn’t confirm a current US price for this one."
         : kind === "vram" ? `${n > 1 ? `${n} × ${usd(picked.dataset.price)}. ` : ""}US street price as of November 2026, for the card${n > 1 ? "s" : ""} only.` : "US price as of November 2026.";
@@ -1181,7 +1199,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       const ref = (big.length ? big : opts).reduce((a, b) => (b.price / b.gb < a.price / a.gb ? b : a), (big.length ? big : opts)[0]);
       if (!ref) return;
       const perGB = ref.price / ref.gb;
-      val = ram * perGB; sub = `${ram}GB at ~${usd(perGB)}/GB, priced like ${ref.what}`;
+      val = ram * perGB; sub = `${ram}GB at ~${usd(perGB)}/GB, priced like ${ref.what}`; hostN = ref.n || 0;
       tip = "Rough estimate scaled from that preset’s US price as of November 2026.";
     }
     $("priceVal").textContent = (picked && !picked.dataset.est ? "" : "≈ ") + usd(val);
@@ -1189,6 +1207,8 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     // Memory line only when the name doesn't already say it (e.g. "512GB Mac Studio").
     $("priceMem").textContent = /\d+GB/.test(sub) ? "" : `${ram}GB ${kind === "vram" ? "VRAM" : "unified memory"}`;
     priceBox.dataset.tip = tip;
+    const host = D.hosts[hostN];
+    $("priceHost").textContent = host ? `+ ~${usd(host.price)} for the ${host.what}` : "";
     priceBox.classList.add("on");
   }
   function updateYou(picked){
