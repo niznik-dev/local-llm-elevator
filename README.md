@@ -21,6 +21,10 @@ memory. The shaft's built-in stops are reference machines (Macs and mini PCs in 
 VRAM mode assumes the whole model fits on the GPU. Partial offload to system RAM (llama.cpp layer
 splitting, MoE experts on CPU) is out of scope.
 
+At ground level the elevator waits in the lobby of a cutaway RobCo-ish tower, with a pneumatic tube
+up to the rider's second-floor office. Below the grass the shaft digs through soil, an aquifer,
+stratified rock, and finally the mantle, where the car starts to shake.
+
 Once you've set a stop, the elevator parks there and everything deeper dims, so you can see at a
 glance what's out of reach. The rider's shirt and your stop take the vendor's color when you pick a
 GPU preset (NVIDIA green, AMD red) and stay orange otherwise.

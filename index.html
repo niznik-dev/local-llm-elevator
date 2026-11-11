@@ -157,6 +157,60 @@ body{overflow-x:clip}
     var(--topsoil) calc(var(--ground, 48px) + 6px), var(--soil) calc(var(--ground, 48px) + 3%), var(--clay) var(--rock0, 20%), var(--rock) var(--rock1, 28%),
     var(--rock-deep) var(--mantle0, 88%), var(--mantle) var(--mantle1, 96%), var(--mantle-hot))}
 .strata>i{position:absolute; left:0; right:0; display:block}
+/* RobCo HQ: a solid glass tower on the grass, cut away at the lobby so the parked car shows. */
+.shaft{--hq-h:150px; --lobby-h:calc(var(--ground, 48px) + 22px); margin-top:8.5rem}
+.hq{position:absolute; z-index:-1; left:-20px; right:6%; bottom:calc(100% - var(--ground, 48px)); height:var(--hq-h); border-radius:5px 5px 0 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='5' y='7' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='45' y='7' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='85' y='7' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='125' y='7' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='165' y='7' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='205' y='7' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='5' y='37' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='45' y='37' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='85' y='37' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='125' y='37' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='165' y='37' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='205' y='37' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='5' y='67' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='45' y='67' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='85' y='67' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='125' y='67' width='30' height='17' rx='1.5' fill='rgba%28140,220,255,.45%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='165' y='67' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='205' y='67' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='5' y='97' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='45' y='97' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='85' y='97' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='125' y='97' width='30' height='17' rx='1.5' fill='rgba%28255,210,120,.75%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='165' y='97' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3Crect x='205' y='97' width='30' height='17' rx='1.5' fill='rgba%28120,170,210,.16%29' stroke='rgba%28255,255,255,.07%29'/%3E%3C/svg%3E") 14px 18px/240px 120px, linear-gradient(100deg, rgba(255,255,255,.07), transparent 35%, rgba(255,255,255,.04) 70%, transparent),
+    linear-gradient(to bottom, #263B4D, #1A2A37); box-shadow:inset 0 3px 0 #3E5A70, 0 -1px 0 rgba(0,0,0,.2)}
+.hq>*{position:absolute; display:block; font-style:normal}
+.hq-mast{left:9%; bottom:100%; width:3px; height:30px; background:#7F8B96}
+.hq-mast::after{content:""; position:absolute; left:-2px; top:-5px; width:7px; height:7px; border-radius:50%; background:#FF4D4D; box-shadow:0 0 8px #FF4D4D; animation:beacon 2.4s infinite}
+@keyframes beacon{0%,60%,100%{opacity:1} 70%,90%{opacity:.15}}
+.hq-sign{right:7%; top:14px; font:800 1.15rem/1 var(--sign); letter-spacing:.12em; color:#7CFF8A;
+  text-shadow:0 0 6px rgba(124,255,138,.8), 0 0 16px rgba(124,255,138,.35); padding:.25rem .55rem .25rem .75rem; background:#0F1A14; border:2px solid #3E5A70; border-radius:4px}
+.hq-lobby{left:12px; bottom:0; width:min(470px, 80%); height:var(--lobby-h);
+  background:radial-gradient(ellipse 60px 10px at 30% 0, rgba(255,240,200,.55), transparent), radial-gradient(ellipse 60px 10px at 75% 0, rgba(255,240,200,.55), transparent),
+    linear-gradient(to bottom, color-mix(in srgb, var(--paper) 88%, #9FD3FF), var(--paper) 80%, color-mix(in srgb, var(--paper) 70%, #8A939C))}
+/* Cutaway section edges: hatched slab above, hatched wall to the right. */
+.hq-room::before,.hq-room::after{content:""; position:absolute; background:repeating-linear-gradient(-45deg, #0F1A23 0 3px, #5B6670 3px 6px)}
+.hq-room::before{left:0; right:-8px; top:-8px; height:8px}
+.hq-room::after{right:-8px; top:0; bottom:0; width:8px}
+/* Second floor: the rider's own desk, empty because they're out riding the elevator. */
+.hq-office{left:12px; bottom:calc(var(--lobby-h) + 8px); width:min(290px, 70%); height:46px;
+  background:linear-gradient(to bottom, color-mix(in srgb, var(--paper) 82%, #FFD9A0), var(--paper) 85%, color-mix(in srgb, var(--paper) 70%, #8A939C))}
+.hq-office>i{position:absolute; font-style:normal; line-height:1}
+.o-cello{right:9px; bottom:6px; font-size:1.3rem; transform:rotate(-45deg)}
+.o-stand{right:15px; bottom:0; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid #3A3F45}
+.o-desk{left:38px; bottom:0; width:104px; height:15px; border-top:4px solid #9A6A43;
+  background:linear-gradient(#9A6A43, #9A6A43) 4px 0/3px 100% no-repeat, linear-gradient(#9A6A43, #9A6A43) calc(100% - 4px) 0/3px 100% no-repeat}
+.o-mug{left:44px; bottom:19px; font-size:.7rem}
+.o-screen{left:62px; bottom:19px; width:44px; height:23px; background:#0B1218; border:2px solid #2B3A47; border-radius:2px;
+  font:700 .4rem/1.15 var(--mono) !important; color:#8FE3FF; text-shadow:0 0 4px rgba(143,227,255,.8); display:grid; place-items:center; text-align:center; letter-spacing:.05em}
+.o-cat{left:110px; bottom:18px; font-size:.95rem}
+.o-chair{left:12px; bottom:1px; font-size:.95rem}
+.o-poster{left:164px; top:5px; width:34px; height:27px; background:#1B2025; border-bottom:4px solid #C8102E; color:#E6E9EC;
+  font:800 .75rem/23px var(--sign) !important; text-align:center; letter-spacing:.05em}
+/* Pneumatic tube from the lobby up to the office; the BRB note hangs at its foot. */
+.hq-tube{left:214px; bottom:0; width:34px; height:calc(var(--lobby-h) + 8px + 46px); border-radius:17px 17px 0 0; overflow:hidden;
+  border:2px solid rgba(143,227,255,.65); border-bottom:0;
+  background:linear-gradient(to right, rgba(170,225,255,.35), rgba(255,255,255,.6) 30%, rgba(170,225,255,.18) 60%, rgba(110,170,205,.35));
+  box-shadow:0 0 0 2px rgba(15,26,35,.35), inset 0 -6px 0 #B8873B}
+/* Doorway cut out of the glass on the office floor; drawn before the capsule so the capsule shows through it. */
+.hq-tube>b{position:absolute; left:2px; right:2px; bottom:calc(var(--lobby-h) + 8px); height:40px; border-radius:14px 14px 0 0;
+  background:color-mix(in srgb, var(--paper) 82%, #FFD9A0); border:2px solid rgba(143,227,255,.9); border-bottom:3px solid #B8873B}
+.hq-tube>i{position:absolute; left:3px; right:3px; height:38px; bottom:6px; border-radius:13px;
+  background:linear-gradient(to bottom, transparent 7px, rgba(20,40,55,.75) 7px 17px, transparent 17px), linear-gradient(to right, #B8873B, #E8C27A 45%, #8C6428);
+  animation:capsule 5s ease-in-out infinite}
+@keyframes capsule{0%,40%{transform:translateY(0)} 60%,90%{transform:translateY(calc(-1 * (var(--lobby-h) + 5px)))} 100%{transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){.hq-tube>i{animation:none}}
+.hq .hq-tube-label{left:256px; bottom:calc(var(--lobby-h) - 32px); font:italic 500 .62rem/1.2 var(--sans); color:var(--ink-soft); white-space:nowrap}
+.hq-note{position:absolute; left:211px; bottom:5px; width:40px; height:34px; z-index:1; background:#FFE97A; color:#5A4218; transform:rotate(4deg); font-style:normal;
+  font:700 .52rem/1.25 var(--mono); display:grid; place-items:center; text-align:center; box-shadow:1px 1px 0 rgba(0,0,0,.2)}
+.hq-desk{position:absolute; right:56px; bottom:0; width:92px; height:24px; border-radius:5px 5px 0 0; background:#22323F; border-top:3px solid #8FE3FF;
+  font:700 .62rem/21px var(--mono); letter-spacing:.2em; color:#8FE3FF; text-align:center; font-style:normal}
+.hq-plant{position:absolute; right:18px; bottom:0; font-size:1.5rem; line-height:1; font-style:normal}
+@media (prefers-reduced-motion: reduce){.hq-mast::after{animation:none}}
+@media (max-width:520px){.shaft{--hq-h:125px; margin-top:7.25rem} .hq-desk{display:none} .hq-sign{font-size:.95rem}}
 .strata .aquifer{top:var(--aq0); height:var(--aqh);
   background:radial-gradient(circle at 30% 40%, rgba(255,255,255,.45) 0 1.4px, transparent 2px) 0 0/23px 17px,
     radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--water) 80%, #fff) 0 1.8px, transparent 2.4px) 7px 5px/31px 19px,
@@ -191,7 +245,7 @@ body{overflow-x:clip}
 @keyframes quake{0%,40%,100%{transform:none} 5%{transform:translate(-1px,.5px) rotate(-1.2deg)} 10%{transform:translate(1px,-.5px) rotate(1.2deg)}
   15%{transform:translate(-1px,0) rotate(-.6deg)} 20%{transform:translate(1px,.5px) rotate(.6deg)} 27%{transform:translate(-.5px,-.5px)} 34%{transform:translate(.5px,0)}}
 @media (prefers-reduced-motion: reduce){.car .door,.car .lamp{transition:none} .car.quake svg{animation:none}}
-.surface{font-family:var(--sign); font-weight:700; letter-spacing:.06em; color:var(--ink-soft); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem}
+.surface{font-family:var(--sign); font-weight:700; letter-spacing:.06em; color:var(--ink-soft); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem; font-size:.85rem; line-height:1.05}
 .surface::before{content:"G"; position:absolute; left:6px; width:32px; height:32px; display:grid; place-items:center; background:var(--hazard); color:var(--hazard-ink); border-radius:50%; font-weight:800; z-index:1}
 
 .level{position:relative; display:grid; grid-template-columns:118px 1fr 300px 140px; gap:1rem; align-items:start;
@@ -451,7 +505,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   <div class="box row2-b"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
 </section>
 
-<footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.</footer>
+<footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.<br>RobCo-ish, N7, and END OF LINE are affectionate nods to Fallout, Mass Effect, and Tron; no affiliation.</footer>
 </div>
 
 <div class="hud">
@@ -1051,7 +1105,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   };
   const signal = n => n ? `<span class="sig" role="img" aria-label="Popularity ${n} of 3">${[1,2,3].map(k => `<b class="${k<=n?"on":""}"></b>`).join("")}</span>` : "";
 
-  let html = `<div class="strata" aria-hidden="true"><i class="aquifer"></i><i class="layers"></i><i class="cracks"></i><i class="magma"></i></div><div class="surface">Ground level: your desk</div>`;
+  let html = `<div class="strata" aria-hidden="true"><i class="aquifer"></i><i class="layers"></i><i class="cracks"></i><i class="magma"></i></div><div class="hq" aria-hidden="true"><i class="hq-mast"></i><span class="hq-sign">RobCo-ish</span><span class="hq-room hq-lobby"><i class="hq-desk">LLM</i><i class="hq-plant">🪴</i></span><span class="hq-room hq-office"><i class="o-stand"></i><i class="o-cello">🎻</i><i class="o-desk"></i><i class="o-mug">☕</i><i class="o-screen">END OF<br>LINE</i><i class="o-cat">🐈</i><i class="o-chair">🪑</i><i class="o-poster">N7</i></span><i class="hq-tube"><b></b><i></i></i><i class="hq-note">BRB<br>→ B14</i><i class="hq-tube-label">(Fancy Pneumatic<br>Transport)</i></div><div class="surface"><span>Ground level:<br>the lobby</span></div>`;
   D.levels.forEach((l, i) => {
     const models = l.models.map(m => {
       const u = hfUrl(m.hf);
