@@ -1076,8 +1076,11 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     const host = o => D.hosts[o.n] || {price:0, what:""};
     const total = o => o.price + (k === "vram" ? host(o).price : 0);
     const best = (k === "unified" ? UNI : RIGS).filter(o => o.usable >= v && o.price).sort((a, b) => total(a) - total(b))[0];
+    // Default limits pick the setup; if a single Mac could stretch to this floor with a raised limit, say so.
+    const stretch = k === "unified" && best && D.devices.find(d => d.usable < v && v <= d.raised && d.price < best.price);
+    const notes = [best?.theory && "theoretical: a Thunderbolt 5 cluster", stretch && `or a single ${stretch.name} with a raised limit`].filter(Boolean);
     const inner = !best ? (k === "unified" ? "No single machine, or even four" : "Needs a data center")
-      : `<b>${esc(best.label)}</b>${/\d+GB/.test(best.label) ? "" : `&nbsp;<small>${best.gb}GB</small>`}${best.hot ? "&nbsp;🔥" : ""} · <span class="usd">$${best.price.toLocaleString("en-US")}</span>${k === "vram" ? ` <small>+ ~$${host(best).price.toLocaleString("en-US")} for the ${host(best).what}</small>` : ""}${best.theory ? " <small>(theoretical: a Thunderbolt 5 cluster)</small>" : ""}`;
+      : `<b>${esc(best.label)}</b>${/\d+GB/.test(best.label) ? "" : `&nbsp;<small>${best.gb}GB</small>`}${best.hot ? "&nbsp;🔥" : ""} · <span class="usd">$${best.price.toLocaleString("en-US")}</span>${k === "vram" ? ` <small>+ ~$${host(best).price.toLocaleString("en-US")} for the ${host(best).what}</small>` : ""}${notes.length ? ` <small>(${notes.join("; ")})</small>` : ""}`;
     return `<div class="cheap" data-kind="${k}">Cheapest option: ${inner}</div>`;
   }
   function smallestRig(v){
