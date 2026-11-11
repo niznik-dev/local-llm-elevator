@@ -200,6 +200,8 @@ body{overflow-x:clip}
 .level,.stop{transition:opacity .3s ease, filter .3s ease}
 .beyond{opacity:.55; filter:grayscale(.7)}
 @media (prefers-reduced-motion: reduce){.level,.stop,.car .shirt,.car .sleeve{transition:none}}
+.cheap{grid-column:1/-1; order:1; font-size:.82rem; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:.45rem}
+.cheap b{color:var(--ink); font-weight:600} .cheap small{font-size:.74rem} .cheap .usd{color:var(--ok); font-weight:700}
 .level .plate{position:absolute; left:-58px; top:1rem; width:32px; height:32px; display:grid; place-items:center;
   background:var(--panel); color:var(--amber); font:600 .78rem var(--mono); border-radius:50%; border:2px solid var(--cable); z-index:1}
 .size{font-family:var(--sign); font-weight:800; font-size:1.55rem; line-height:1.05}
@@ -248,6 +250,10 @@ body{overflow-x:clip}
 .fits .rotor>*{grid-area:1/1; place-self:center; margin:0; font-style:normal; font-size:.9em; line-height:1; opacity:0; animation:rotor 4.5s infinite}
 .rotor>:nth-child(2){animation-delay:-3s}
 .rotor>:nth-child(3){animation-delay:-1.5s}
+.fits .rotor.two>*{animation-name:rotor2; animation-duration:3s}
+.fits .rotor.two>:nth-child(2){animation-delay:-1.5s}
+@keyframes rotor2{0%,45%{opacity:1} 51%,94%{opacity:0} 100%{opacity:1}}
+.fits .rotor.words>span{font-size:inherit; padding:0; border:0; justify-self:start; display:inline-flex; align-items:center; white-space:nowrap}
 @keyframes rotor{0%,30%{opacity:1} 34%,96%{opacity:0} 100%{opacity:1}}
 @media (prefers-reduced-motion: reduce){.fits .rotor{display:inline-flex; width:auto; gap:.2rem; align-items:center} .fits .rotor>*{animation:none; opacity:1}}
 .aside{flex-basis:100%; font-size:.8rem; font-style:italic}
@@ -279,18 +285,32 @@ body{overflow-x:clip}
 .stop::before{content:""; position:absolute; left:-58px; top:50%; width:32px; height:4px; margin-top:-2px; border-radius:2px; background:var(--c)}
 .stop.last{border:2px solid var(--c); background:var(--cs)}
 .stop.rec{border:2px dashed var(--c); background:var(--paper); font-weight:500}
-:root[data-kind="unified"] :is(.stop,.aside)[data-kind="vram"],:root[data-kind="vram"] :is(.stop,.aside)[data-kind="unified"]{display:none}
+:root[data-kind="unified"] :is(.stop,.aside,.fits,.tick,.cheap)[data-kind="vram"],:root[data-kind="vram"] :is(.stop,.aside,.fits,.tick,.cheap)[data-kind="unified"]{display:none}
 
 /* floating indicator */
-.indicator{position:fixed; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--panel); border:2px solid #2E343A;
+.hud{position:fixed; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0px)); z-index:20; display:flex; flex-direction:column; align-items:flex-end; gap:.4rem; pointer-events:none}
+.indicator,.price{background:var(--panel); border:2px solid #2E343A;
   display:flex; align-items:center; justify-content:space-between; gap:.9rem;
-  border-radius:12px; padding:.55rem .8rem; min-width:150px; z-index:20; opacity:0; transform:translateY(8px); transition:opacity .25s ease, transform .25s ease; pointer-events:none}
+  border-radius:12px; padding:.55rem .8rem; min-width:150px; opacity:0; transform:translateY(8px); transition:opacity .25s ease, transform .25s ease; pointer-events:none}
 .indicator.show{opacity:1; transform:none}
+/* Only shown alongside the indicator, and only once there's a stop to price. */
+.price{display:none; max-width:13rem}
+.hud:has(.indicator.show) .price.on{display:block; opacity:1; transform:none}
+.price .sub{line-height:1.35}
+.price{--money:#85BB65; border-color:color-mix(in srgb, var(--money) 45%, #2E343A); position:relative}
+.price.on{pointer-events:auto; cursor:help}
+.hud .price .big{color:var(--money)}
+.price:focus-visible{outline:2px solid var(--money); outline-offset:2px}
+/* Caveats live in a hover/focus tip so the box itself stays terse. */
+.price::after{content:attr(data-tip); position:absolute; right:0; bottom:calc(100% + 6px); width:max-content; max-width:15rem; background:var(--panel); color:#E6E9EC;
+  font:400 .76rem/1.4 var(--sans); padding:.4rem .6rem; border-radius:6px; border:1px solid var(--money); opacity:0; visibility:hidden; transition:opacity .2s ease, visibility .2s}
+.price:is(:hover,:focus)::after{opacity:1; visibility:visible}
+@media (prefers-reduced-motion: reduce){.price::after{transition:none}}
 .ind-gem svg{display:block; width:30px; height:30px; filter:drop-shadow(0 0 6px rgba(255,255,255,.18))}
 .ind-gem.restricted svg{filter:drop-shadow(0 0 5px #9B6BFF)}
-.indicator .lbl{font-family:var(--sign); font-weight:700; letter-spacing:.1em; color:#8C949C; font-size:.75rem}
-.indicator .big{font:600 1.6rem/1 var(--mono); color:var(--amber)}
-.indicator .sub{font:500 .78rem var(--mono); color:#C9CED4; margin-top:.2rem}
+.price .lbl,.indicator .lbl{font-family:var(--sign); font-weight:700; letter-spacing:.1em; color:#8C949C; font-size:.75rem}
+.price .big,.indicator .big{font:600 1.6rem/1 var(--mono); color:var(--amber)}
+.price .sub,.indicator .sub{font:500 .78rem var(--mono); color:#C9CED4; margin-top:.2rem}
 @media (prefers-reduced-motion: reduce){.indicator{transition:none}}
 
 /* notes */
@@ -322,7 +342,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   .stop::before{left:-44px; width:26px}
   .level{grid-template-columns:1fr; grid-template-areas:"size" "models" "mem" "claude"}
 }
-@media print{.indicator{display:none} .level,.box,.stop{break-inside:avoid}}
+@media print{.hud{display:none} .level,.box,.stop{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -432,6 +452,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 <footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.</footer>
 </div>
 
+<div class="hud">
+<div class="price" id="price" tabindex="0">
+  <div class="lbl">EST. HARDWARE VALUE</div>
+  <div class="big" id="priceVal"></div>
+  <div class="sub" id="priceSub"></div>
+  <div class="sub" id="priceMem"></div>
+</div>
 <div class="indicator" id="indicator" aria-hidden="true">
   <div>
     <div class="lbl">NOW PASSING</div>
@@ -439,6 +466,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     <div class="sub" id="indSub">Surface</div>
   </div>
   <div class="ind-gem" id="indGem"></div>
+</div>
 </div>
 
 <!-- Data lives here so it can be lifted into a JSON file for pull requests. -->
@@ -450,6 +478,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "name": "32GB MacBook Pro",
    "short": "32GB 💻",
    "ram": 32,
+   "price": 3500,
    "usable": 21,
    "raised": 26,
    "laptop": true,
@@ -459,6 +488,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "name": "64GB MacBook Pro",
    "short": "64GB 💻",
    "ram": 64,
+   "price": 6000,
    "usable": 48,
    "raised": 56,
    "laptop": true,
@@ -468,6 +498,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "name": "128GB Mac Studio",
    "short": "128GB 🤍",
    "ram": 128,
+   "price": 5000,
    "usable": 96,
    "raised": 120,
    "laptop": false,
@@ -477,6 +508,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "name": "256GB Mac Studio",
    "short": "256GB 🩶",
    "ram": 256,
+   "price": 10000,
    "usable": 192,
    "raised": 240,
    "laptop": false,
@@ -486,6 +518,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
    "name": "512GB Mac Studio",
    "short": "512GB 🖤",
    "ram": 512,
+   "price": 22300,
    "usable": 384,
    "raised": 480,
    "laptop": false,
@@ -493,20 +526,21 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   }
  ],
  "minis": [
-  {"name": "128GB Strix Halo mini PC", "short": "Strix Halo", "icon": "❤️", "vendor": "amd", "ram": 128, "usable": 96,
+  {"name": "128GB Strix Halo mini PC", "short": "Strix Halo", "icon": "❤️", "vendor": "amd", "ram": 128, "usable": 96, "price": 3600,
    "note": "About 96GB usable by the GPU, the most Windows allows; Linux can go a little higher."},
-  {"name": "DGX Spark", "short": "DGX Spark", "icon": "💚", "vendor": "nvidia", "ram": 128, "usable": 96,
+  {"name": "DGX Spark", "short": "DGX Spark", "icon": "💚", "vendor": "nvidia", "ram": 128, "usable": 96, "price": 6950,
    "note": "No fixed split: the GPU can use whatever the OS isn’t, so plan on about 96GB."}
  ],
  "gpus": [
-  {"name": "an RX 9060 XT", "short": "RX 9060 XT", "vendor": "amd", "vram": 8, "max": 1,
+  {"name": "an RX 9060 XT", "short": "RX 9060 XT", "vendor": "amd", "vram": 8, "max": 1, "price": 700,
    "why": "8GB cards are rarely combined: one bigger card goes further for the money."},
-  {"name": "an RTX 5070", "short": "RTX 5070", "vendor": "nvidia", "vram": 12, "max": 1,
+  {"name": "an RTX 5070", "short": "RTX 5070", "vendor": "nvidia", "vram": 12, "max": 1, "price": 900,
    "why": "12GB cards are rarely combined: one bigger card goes further for the money."},
-  {"name": "an RX 9070 XT", "short": "RX 9070 XT", "vendor": "amd", "vram": 16, "max": 2, "rigStops": true,
+  {"name": "an RX 9070 XT", "short": "RX 9070 XT", "vendor": "amd", "vram": 16, "max": 2, "price": 1000, "rigStops": true,
    "why": "Few people run four of these: AMD’s multi-card support for this generation is still young."},
-  {"name": "an RTX 3090", "short": "RTX 3090", "vendor": "nvidia", "vram": 24, "max": 4, "rigStops": true},
-  {"name": "an RTX 5090", "short": "RTX 5090", "vendor": "nvidia", "vram": 32, "max": 4, "rigStops": true}
+  {"name": "an RTX 3090", "short": "RTX 3090", "vendor": "nvidia", "vram": 24, "max": 4, "price": 1200, "rigStops": true},
+  {"name": "an RTX 5090", "short": "RTX 5090", "vendor": "nvidia", "vram": 32, "max": 4, "price": 6900, "rigStops": true, "showoff": 8,
+   "showoffNote": "Not in the picker, because that’s about 4.6kW of graphics cards. At this point you own a space heater that does inference."}
  ],
  "datacenter": [
   {"short": "H100", "vram": 80, "url": "https://en.wikipedia.org/wiki/Hopper_(microarchitecture)"},
@@ -912,7 +946,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   $("levelCount").textContent = lvl(D.levels.length - 1);
   const LEGEND = {
     unified: "🍎 Reference Macs: " + D.devices.map(d => `<i class="dot" style="background:var(--${d.color})"></i>${esc(d.short)}`).join(" &nbsp; ")
-      + " &nbsp;·&nbsp; Mini PCs: " + D.minis.map(m => `<i class="dot ${m.vendor}"></i>${esc(m.short)}`).join(" &nbsp; "),
+      + " &nbsp;·&nbsp; Mini PCs: " + D.minis.map(m => `<i class="dot ${m.vendor}"></i>${esc(m.short)} ${m.icon}`).join(" &nbsp; "),
     vram: "🎮 Reference GPUs: " + D.gpus.map(g => `<i class="dot ${g.vendor}"></i>${esc(g.short)}`).join(" &nbsp; ")
   };
 
@@ -950,19 +984,45 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     }
     addStop(deepestFit(d.raised), `<div class="stop last" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`, d.ram);
   }
-  const COUNTS = [1, 2, 4], COUNT_WORDS = {2:"two", 4:"four"};
+  const COUNTS = [1, 2, 4], COUNT_WORDS = {2:"two", 4:"four", 8:"eight"};
+  // showoff: a count too absurd for the picker that still gets a stop and pills.
+  const countsFor = g => [...(g.rigStops ? COUNTS.filter(n => n <= g.max) : [1]), ...(g.showoff ? [g.showoff] : [])];
   for (const g of D.gpus){
-    for (const n of g.rigStops ? COUNTS.filter(n => n <= g.max) : [1]){
+    for (const n of countsFor(g)){
       const vram = g.vram * n, usable = Math.floor(vram * VRAM_USABLE);
       const who = n === 1 ? g.name : `${COUNT_WORDS[n]} ${g.short}s`;
-      addStop(deepestFit(usable), `<div class="stop last" data-kind="vram" style="--c:var(--${g.vendor});--cs:color-mix(in srgb, var(--${g.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for ${esc(who)} <small>${vram}GB of VRAM, about ${usable}GB usable after driver and display overhead.</small></div></div>`, vram);
+      const note = n === g.showoff ? `${vram}GB of VRAM, about ${usable}GB usable. ${g.showoffNote}` : `${vram}GB of VRAM, about ${usable}GB usable after driver and display overhead.`;
+      addStop(deepestFit(usable), `<div class="stop last" data-kind="vram" style="--c:var(--${g.vendor});--cs:color-mix(in srgb, var(--${g.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for ${esc(who)} <small>${esc(note)}</small></div></div>`, vram);
     }
+  }
+  // VRAM-mode pills: the smallest setup that fits; setups with equal room take turns.
+  const RIGS = D.gpus.flatMap(g => countsFor(g).map(n => ({
+    label: (n > 1 ? `${n}× ` : "") + g.short, gb: g.vram * n, hot: n === g.showoff, vendor: g.vendor, usable: Math.floor(g.vram * n * VRAM_USABLE), price: g.price * n
+  }))).sort((a, b) => a.usable - b.usable);
+  // Cheapest way to hold a floor's Q4 weights, within one kind of memory (default limits, no tuning).
+  const UNI = [...D.devices.map(d => ({label:d.name, usable:d.usable, price:d.price, gb:d.ram})),
+    ...D.minis.map(m => ({label:m.short, usable:m.usable, price:m.price, gb:m.ram}))];
+  function cheapest(k, v){
+    const best = (k === "unified" ? UNI : RIGS).filter(o => o.usable >= v && o.price).sort((a, b) => a.price - b.price)[0];
+    const inner = !best ? (k === "unified" ? "No single machine" : "Needs a data center")
+      : `<b>${esc(best.label)}</b>${/\d+GB/.test(best.label) ? "" : `&nbsp;<small>${best.gb}GB</small>`}${best.hot ? "&nbsp;🔥" : ""} · <span class="usd">$${best.price.toLocaleString("en-US")}</span>`;
+    return `<div class="cheap" data-kind="${k}">Cheapest option: ${inner}</div>`;
+  }
+  function smallestRig(v){
+    const fit = RIGS.find(r => v <= r.usable);
+    if (!fit) return {cls:"no", text:"Needs a data center"};
+    // Total VRAM rides along, like the Mac pills' "64GB".
+    const one = r => `<i class="dot ${r.vendor}" aria-hidden="true"></i>${esc(r.label)}&nbsp;<small>${r.gb}GB</small>${r.hot ? "&nbsp;🔥" : ""}`;
+    const ties = RIGS.filter(r => r.usable === fit.usable);
+    return {cls:"ok", text: ties.length === 1 ? one(fit)
+      : `<span class="rotor words${ties.length === 2 ? " two" : ""}" role="img" aria-label="${esc(ties.map(r => `${r.label} ${r.gb}GB`).join(" or "))}">${ties.map(r => `<span>${one(r)}</span>`).join("")}</span>`};
   }
   for (const m of D.minis){
     addStop(deepestFit(m.usable), `<div class="stop last" data-kind="unified" style="--c:var(--${m.vendor});--cs:color-mix(in srgb, var(--${m.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(m.name)} <small>${esc(m.note)}</small></div></div>`, m.ram);
   }
 
-  const ticks = D.devices.map(d => `<span class="tick" style="left:${pct(d.ram)}%;background:var(--${d.color})"></span>`).join("");
+  const ticks = D.devices.map(d => `<span class="tick" data-kind="unified" style="left:${pct(d.ram)}%;background:var(--${d.color})"></span>`).join("")
+    + D.gpus.map(g => `<span class="tick" data-kind="vram" style="left:${pct(g.vram)}%;background:var(--${g.vendor})"></span>`).join("");
   const bar = (q, v, label) => `<div class="bar ${q}"><span class="q">${q.toUpperCase()}</span><span class="track"><span class="fill" style="width:${pct(v)}%"></span>${ticks}</span><span class="val">${label || fmt(v)}</span></div>`;
   const gemSvg = c => `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6,3 18,3 22,9 12,21 2,9" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1" stroke-linejoin="round"/><path d="M2 9h20M6 3l3 6 3-6 3 6 3-6M9 9l3 12 3-12" fill="none" stroke="rgba(0,0,0,.22)" stroke-width=".8"/><path d="M7.5 4.5l1.6 3" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/></svg>`;
   const gem = g => {
@@ -984,15 +1044,16 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     if (l.restricted){
       mem = `<div class="mem"><div class="fits"><span class="no">Weights not available</span></div></div>`;
     } else {
-      const a = smallest(l.q4), b = smallest(l.q8);
+      const fits = (k, a, b) => `<div class="fits" data-kind="${k}"><span class="${a.cls}">Q4: ${a.text}</span><span class="${b.cls}">Q8: ${b.text}</span></div>`;
       const dc = D.datacenter.map(g => `<b>${Math.ceil(l.q8 / (g.vram * VRAM_USABLE))}×</b> <a href="${g.url}" target="_blank" rel="noopener">${esc(g.short)}</a>`).join(" · ");
-      mem = `<div class="mem" aria-label="Memory needs">${bar("q4", l.q4, l.q4Label)}${bar("q8", l.q8, l.q8Label)}<div class="fits"><span class="${a.cls}">Q4: ${a.text}</span><span class="${b.cls}">Q8: ${b.text}</span></div><div class="dc"><span aria-hidden="true">🏢</span> Data center, 8-bit: ${dc}</div></div>`;
+      mem = `<div class="mem" aria-label="Memory needs">${bar("q4", l.q4, l.q4Label)}${bar("q8", l.q8, l.q8Label)}${fits("unified", smallest(l.q4), smallest(l.q8))}${fits("vram", smallestRig(l.q4), smallestRig(l.q8))}<div class="dc"><span aria-hidden="true">🏢</span> Data center, 8-bit: ${dc}</div></div>`;
     }
     html += `<article class="level${l.restricted ? " restricted" : ""}" id="${lvl(i).toLowerCase()}" data-level="${lvl(i)}" data-size="${esc(l.size)}" data-gem="${l.gem ? esc(l.gem.name) : ""}" data-gem-color="${l.gem ? esc(l.gem.color) : ""}">
       <span class="plate" aria-hidden="true">${lvl(i)}</span>
       <div class="size">${esc(l.size)}<small>${lvl(i)}${l.kind ? " " + esc(l.kind) : ""}</small>${gem(l.gem)}</div>
       <div class="models">${models}</div>
       ${mem}
+      ${l.restricted ? `<div class="cheap">Cheapest option: <b>Found your own frontier LLM company</b> · <span class="usd">$10B (Y Combinator?)</span> and a nuclear plant ☢️ or solar farm ☀️</div>` : cheapest("unified", l.q4) + cheapest("vram", l.q4)}
       <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}<small class="next">Comparable ChatGPT</small>${esc(l.chatgpt)}${l.chatgptTip ? `<span class="star" tabindex="0" aria-label="Note">*<span class="star-tip" role="tooltip">${esc(l.chatgptTip)}</span></span>` : ""}${l.chatgptNote ? `<small>${esc(l.chatgptNote)}</small>` : ""}</div>
     </article>`;
     if (stopsAfter[i]) html += stopsAfter[i].sort((a, b) => a.key - b.key).map(st => st.html).join("");
@@ -1023,14 +1084,14 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     unified: {
       label:"How much unified memory?", noun:"of unified memory", presetLabel:"Pick a 🍎 Mac or a mini PC",
       hint:"The CPU and GPU share one pool: Apple Silicon Macs, AMD Strix Halo, NVIDIA DGX Spark.",
-      presets:() => D.devices.map(d => `<button type="button" data-ram="${d.ram}" aria-pressed="false"><i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}</button>`)
-        .concat(D.minis.map(m => `<button type="button" data-ram="${m.ram}" data-vendor="${m.vendor}" aria-pressed="false"><i class="dot ${m.vendor}" aria-hidden="true"></i>${esc(m.short)}&nbsp;<small>${m.ram}GB</small></button>`))
+      presets:() => D.devices.map(d => `<button type="button" data-ram="${d.ram}" data-price="${d.price}" data-est="${d.priceEst ? 1 : ""}" data-what="${esc(d.name)}" aria-pressed="false"><i class="dot" style="background:var(--${d.color})" aria-hidden="true"></i>${esc(d.short)}</button>`)
+        .concat(D.minis.map(m => `<button type="button" data-ram="${m.ram}" data-price="${m.price}" data-what="${esc(m.short)}" data-vendor="${m.vendor}" aria-pressed="false"><i class="dot ${m.vendor}" aria-hidden="true"></i>${esc(m.short)}&nbsp;<small>${m.ram}GB</small>&nbsp;${m.icon}</button>`))
     },
     vram: {
       label:"How much VRAM?", noun:"of VRAM",
       presetLabel:`Pick a 🎮 gaming GPU <span class="vendor-key">(<i class="dot nvidia" aria-hidden="true"></i>NVIDIA <i class="dot amd" aria-hidden="true"></i>AMD)</span>`,
       hint:"A separate graphics card; with several of the same card, pick how many, or type the total. Assumes the whole model fits on the GPU, with no offloading to system RAM.",
-      presets:() => D.gpus.map(g => `<button type="button" data-ram="${g.vram}" data-max="${g.max}" data-why="${esc(g.why || "")}" data-vendor="${g.vendor}" aria-pressed="false"><i class="dot ${g.vendor}" aria-hidden="true"></i>${esc(g.short)}&nbsp;<small>${g.vram}GB</small></button>`)
+      presets:() => D.gpus.map(g => `<button type="button" data-ram="${g.vram}" data-max="${g.max}" data-price="${g.price}" data-est="${g.priceEst ? 1 : ""}" data-what="${esc(g.short)}" data-why="${esc(g.why || "")}" data-vendor="${g.vendor}" aria-pressed="false"><i class="dot ${g.vendor}" aria-hidden="true"></i>${esc(g.short)}&nbsp;<small>${g.vram}GB</small></button>`)
     }
   };
   let kind = "unified", cards = 1, pickedCard = null;
@@ -1099,7 +1160,39 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     requestAnimationFrame(() => { onMove(); updateIndicator(); });
   }
   // Track the clicked button, not the value: two GPUs can share a VRAM size.
+  // Picked presets show their price; a typed amount borrows $/GB from the cheapest preset setup that holds at least that much.
+  const usd = n => "$" + Math.round(n).toLocaleString("en-US");
+  const priceBox = $("price");
+  function priceOptions(){
+    if (kind === "unified") return [...D.devices.map(d => ({gb:d.ram, price:d.price, what:d.name})), ...D.minis.map(m => ({gb:m.ram, price:m.price, what:m.short}))];
+    return D.gpus.flatMap(g => COUNTS.filter(n => n <= g.max).map(n => ({gb:g.vram * n, price:g.price * n, what:(n > 1 ? `${n}× ` : "") + g.short})));
+  }
+  function showPrice(ram, picked){
+    let val, sub, tip;
+    if (picked?.dataset.price){
+      const n = kind === "vram" ? cards : 1;
+      val = picked.dataset.price * n;
+      sub = (n > 1 ? `${n}× ` : "") + picked.dataset.what;
+      tip = picked.dataset.est ? "Rough estimate: we couldn’t confirm a current US price for this one."
+        : kind === "vram" ? `${n > 1 ? `${n} × ${usd(picked.dataset.price)}. ` : ""}US street price as of November 2026, for the card${n > 1 ? "s" : ""} only.` : "US price as of November 2026.";
+    } else {
+      const opts = priceOptions().filter(o => o.price);
+      const big = opts.filter(o => o.gb >= ram);
+      const ref = (big.length ? big : opts).reduce((a, b) => (b.price / b.gb < a.price / a.gb ? b : a), (big.length ? big : opts)[0]);
+      if (!ref) return;
+      const perGB = ref.price / ref.gb;
+      val = ram * perGB; sub = `${ram}GB at ~${usd(perGB)}/GB, priced like ${ref.what}`;
+      tip = "Rough estimate scaled from that preset’s US price as of November 2026.";
+    }
+    $("priceVal").textContent = (picked && !picked.dataset.est ? "" : "≈ ") + usd(val);
+    $("priceSub").textContent = sub;
+    // Memory line only when the name doesn't already say it (e.g. "512GB Mac Studio").
+    $("priceMem").textContent = /\d+GB/.test(sub) ? "" : `${ram}GB ${kind === "vram" ? "VRAM" : "unified memory"}`;
+    priceBox.dataset.tip = tip;
+    priceBox.classList.add("on");
+  }
   function updateYou(picked){
+    priceBox.classList.remove("on");
     pickedCard = kind === "vram" && picked || null;
     if (!pickedCard) cards = 1;
     syncCards();
@@ -1120,6 +1213,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     const slot = document.querySelector(`.you-slot[data-after="${i}"]`);
     slot.innerHTML = `<div class="stop last" style="--c:var(--you);--cs:var(--yous)" role="note"><span class="chip">YOU</span><div>Your elevator’s last stop <small>${ram}GB ${KINDS[kind].noun}${cards > 1 ? ` across ${cards} cards` : ""}, about ${usable}GB usable by the GPU${kind === "unified" ? " by default" : ""}.</small></div></div>`;
     ramOut.textContent = `About ${usable}GB usable: you can reach ${lvl(i)} (${D.levels[i].size}).`;
+    showPrice(ram, picked);
     go.disabled = false;
     setYouFloor(i);
   }
