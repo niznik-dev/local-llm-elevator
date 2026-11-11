@@ -25,19 +25,25 @@ Once you've set a stop, the elevator parks there and everything deeper dims, so 
 glance what's out of reach. The rider's shirt and your stop take the vendor's color when you pick a
 GPU preset (NVIDIA green, AMD red) and stay orange otherwise.
 
+A money-green **hardware value** box floats above the floor tracker: the US price of the preset you
+picked (times the card count), or, for a typed amount, an estimate from the cheapest preset's $/GB.
+Hover it for where the number comes from.
+
 ## What's on each floor
 
 | Field | Meaning |
 |---|---|
 | **Q4 / Q8 memory** | Approximate weight footprint at 4-bit and 8-bit quantization |
 | **Models** | Notable open-weight releases from the past year at that size, linked to Hugging Face |
+| **Fit pills** | The smallest reference machine that holds the Q4 / Q8 weights. Unified mode names Macs and mini PCs; VRAM mode names card setups with their total VRAM. Setups with equal room take turns |
+| **Cheapest option** | The least expensive setup that holds the Q4 weights at default limits, within the current memory mode (a card isn't compared to a whole computer) |
 | **🏢 Data center** | How many 80GB H100s or ~180GB B200s hold the 8-bit (FP8) weights, at 90% usable per card (minimums, not deployment-shaped counts) |
 | **Comparable Claude model** | The Claude tier you'd reach for on the same kind of task (not a claim of equal performance) |
 | **Comparable ChatGPT model** | The same idea for OpenAI's API tiers (GPT-6 Luna, GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Astra) |
 | **Popularity** | A rough three-step signal from OpenRouter token usage and Hugging Face downloads |
 | **Gem** | Decoration. It's a mine shaft, so gems get roughly pricier the deeper you go (quartz to red diamond, then antimatter). They say nothing about the model |
 
-Reference stops are shown for 32GB and 64GB MacBook Pros (💻) and 128 / 256 / 512GB Mac Studios (🤍 🩶 🖤), plus 128GB Strix Halo (❤️) and DGX Spark (💚) mini PCs, which take turns with the 128GB Studio in the fit pills. In VRAM mode those stops swap out for one per GPU preset, plus a stop for every multi-card count the selector allows (2× RX 9070 XT; 2× and 4× RTX 3090 and 5090). A
+Reference stops are shown for 32GB and 64GB MacBook Pros (💻) and 128 / 256 / 512GB Mac Studios (🤍 🩶 🖤), plus 128GB Strix Halo (❤️) and DGX Spark (💚) mini PCs, which take turns with the 128GB Studio in the fit pills. In VRAM mode those stops swap out for one per GPU preset, plus a stop for every multi-card count the selector allows (2× RX 9070 XT; 2× and 4× RTX 3090 and 5090), and one 8× RTX 5090 🔥 stop that's deliberately left out of the picker. A
 **solid** box is the last floor that fits; a **dashed** box is the recommended stop if you want to keep
 other apps open.
 
@@ -69,13 +75,16 @@ All model and device data lives in a JSON block inside `index.html`:
 
 | Key | Holds |
 |---|---|
-| `"levels"` | Each floor: size, Q4/Q8 memory, models, comparable Claude model, gem |
-| `"devices"` | Reference Mac stops and their usable / raised GPU memory |
-| `"gpus"` | VRAM presets, with `vendor` (`nvidia` or `amd`) for the dot and shirt color |
+| `"levels"` | Each floor: size, Q4/Q8 memory, models, comparable Claude and ChatGPT models, gem |
+| `"devices"` | Reference Mac stops: usable / raised GPU memory and `price` |
+| `"minis"` | Unified mini PCs (Strix Halo, DGX Spark): usable memory, `icon`, `price` |
+| `"gpus"` | VRAM presets: `vendor` (`nvidia` or `amd`) for the dot and shirt color, `price` per card, `max` cards (with a `why` tooltip for greyed-out counts), `rigStops`, and an optional `showoff` count |
 | `"datacenter"` | Cards for the 🏢 line, with a `url` for each name's link |
 
 To add a model, append it to the matching level's `models` array; to change the memory budget
-assumptions, edit `appsReserveGB` and `contextReserveGB`. Bump `"updated"` when you do.
+assumptions, edit `appsReserveGB` and `contextReserveGB`. Prices are US prices as of November 2026
+(street prices for GPUs); add `"priceEst": true` to mark one as a rough estimate. Bump `"updated"`
+when you do.
 
 ## Caveats
 
