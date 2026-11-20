@@ -33,6 +33,7 @@
   --d512:#3F454D; --d512s:#D2D6DB;
   --you:#E77500; --yous:color-mix(in srgb, var(--you) 16%, var(--paper));
   --nvidia:#76B900; --amd:#ED1C24; --clear:#F7B6D2;
+  --rift:#1F7FC4; --rift-glow:#7FD8FF; --chevron:#E8641E;
   --grass:#6E8B3D; --topsoil:#5C3F28; --soil:#7E5A3A; --clay:#A0784F; --rock:#8C8A84; --rock-deep:#5B5F63; --mantle:#B5471B; --mantle-hot:#F2A341; --water:#4C8DB8;
   --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --sign:"Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
@@ -47,7 +48,7 @@
     --bg:#101316; --paper:#191D21; --ink:#E6E9EC; --ink-soft:#9AA4AE; --line:#2B3137;
     --shaft:#0B0D0F; --cable:#4A525A;
     --ok-soft:#173528; --warn-soft:#3A2E10; --no-soft:#22272C;
-    --q4:#5FA6E3; --q8:#9CC6EE;
+    --q4:#5FA6E3; --q8:#9CC6EE; --rift:#5CC8FF; --rift-glow:#B8ECFF; --chevron:#FF8A3D;
     --d32:#E8A89C; --d32s:#3E2925; --d64:#E3C25A; --d64s:#3A3115;
     --d128:#E2E5E9; --d128s:#2C3137; --d256:#9AA1AB; --d256s:#262A30; --d512:#5D646D; --d512s:#1E2227;
       --grass:#3F5223; --topsoil:#2E2117; --soil:#3D2C1E; --clay:#54402D; --rock:#3A3C3E; --rock-deep:#26292C; --mantle:#7A2E12; --mantle-hot:#C9682A; --water:#2E6A90;
@@ -60,7 +61,7 @@
   --bg:#101316; --paper:#191D21; --ink:#E6E9EC; --ink-soft:#9AA4AE; --line:#2B3137;
   --shaft:#0B0D0F; --cable:#4A525A;
   --ok-soft:#173528; --warn-soft:#3A2E10; --no-soft:#22272C;
-  --q4:#5FA6E3; --q8:#9CC6EE;
+  --q4:#5FA6E3; --q8:#9CC6EE; --rift:#5CC8FF; --rift-glow:#B8ECFF; --chevron:#FF8A3D;
   --d32:#E8A89C; --d32s:#3E2925; --d64:#E3C25A; --d64s:#3A3115;
   --d128:#E2E5E9; --d128s:#2C3137; --d256:#9AA1AB; --d256s:#262A30; --d512:#5D646D; --d512s:#1E2227;
   --grass:#3F5223; --topsoil:#2E2117; --soil:#3D2C1E; --clay:#54402D; --rock:#3A3C3E; --rock-deep:#26292C; --mantle:#7A2E12; --mantle-hot:#C9682A; --water:#2E6A90;
@@ -248,15 +249,15 @@ body{overflow-x:clip}
 .surface{font-family:var(--sign); font-weight:700; letter-spacing:.06em; color:var(--ink-soft); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem; font-size:.85rem; line-height:1.05}
 .surface::before{content:"G"; position:absolute; left:6px; width:32px; height:32px; display:grid; place-items:center; background:var(--hazard); color:var(--hazard-ink); border-radius:50%; font-weight:800; z-index:1}
 
-.level{position:relative; display:grid; grid-template-columns:118px 1fr 300px 140px; gap:1rem; align-items:start;
+.level,.rift{position:relative; display:grid; grid-template-columns:118px 1fr 300px 140px; gap:1rem; align-items:start;
   background:var(--paper); border:1px solid var(--line); border-left:6px solid var(--ink); border-radius:8px;
   padding:1rem 1.1rem; margin:0 0 .8rem}
-.level,.stop{transition:opacity .3s ease, filter .3s ease}
+.level,.stop,.rift{transition:opacity .3s ease, filter .3s ease}
 .beyond{opacity:.55; filter:grayscale(.7)}
 @media (prefers-reduced-motion: reduce){.level,.stop,.car .shirt,.car .sleeve{transition:none}}
 .cheap{grid-column:1/-1; order:1; font-size:.82rem; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:.45rem}
 .cheap b{color:var(--ink); font-weight:600} .cheap small{font-size:.74rem} .cheap .usd{color:var(--ok); font-weight:700}
-.level .plate{position:absolute; left:-58px; top:1rem; width:32px; height:32px; display:grid; place-items:center;
+.level .plate,.rift .plate{position:absolute; left:-58px; top:1rem; width:32px; height:32px; display:grid; place-items:center;
   background:var(--panel); color:var(--amber); font:600 .78rem var(--mono); border-radius:50%; border:2px solid var(--cable); z-index:1}
 .size{font-family:var(--sign); font-weight:800; font-size:1.55rem; line-height:1.05}
 .size small{display:block; font:500 .78rem var(--mono); color:var(--ink-soft); margin-top:.25rem}
@@ -275,6 +276,47 @@ body{overflow-x:clip}
 .egg-tip::after{content:""; position:absolute; left:14px; top:100%; border:7px solid transparent; border-top-color:var(--panel)}
 .gem.egg:hover .egg-tip,.gem.egg:focus .egg-tip{opacity:1; transform:none}
 @media (prefers-reduced-motion: reduce){.egg-tip,.gem.egg svg{transition:none}}
+/* Rifts: a lower-bit edition of a deeper floor's model, projected as a hologram at the depth its memory reaches. */
+.rift{border:1px dashed var(--rift); border-left:6px solid var(--rift);
+  background:repeating-linear-gradient(0deg, color-mix(in srgb, var(--rift) 7%, transparent) 0 1px, transparent 1px 4px), color-mix(in srgb, var(--rift) 6%, var(--paper));
+  margin:2rem 0 2.2rem;
+  --aura:0 0 0 1px color-mix(in srgb, var(--rift-glow) 45%, transparent), 0 0 22px 4px color-mix(in srgb, var(--rift-glow) 45%, transparent), 0 0 70px 22px color-mix(in srgb, var(--rift) 28%, transparent), 0 0 140px 50px color-mix(in srgb, var(--rift) 12%, transparent);
+  box-shadow:var(--aura)}
+/* The field: a band of not-normal space across the whole shaft and page at the card's height (body clips the overflow). */
+.rift::before{content:""; position:absolute; z-index:-1; top:-5rem; bottom:-5rem; left:-100vw; right:-100vw; pointer-events:none;
+  background:repeating-linear-gradient(0deg, transparent 0 9px, color-mix(in srgb, var(--rift-glow) 7%, transparent) 9px 10px),
+    linear-gradient(transparent, color-mix(in srgb, var(--rift) 38%, transparent) 22%, color-mix(in srgb, var(--rift-glow) 58%, transparent) 50%, color-mix(in srgb, var(--rift) 38%, transparent) 78%, transparent);
+  -webkit-backdrop-filter:blur(16px) saturate(1.5) brightness(1.08); backdrop-filter:blur(16px) saturate(1.5) brightness(1.08);
+  -webkit-mask:linear-gradient(transparent, #000 22%, #000 78%, transparent); mask:linear-gradient(transparent, #000 22%, #000 78%, transparent)}
+.rift .plate{color:var(--rift-glow); border-color:var(--rift); font:600 1.05rem var(--sans); box-shadow:0 0 10px 2px color-mix(in srgb, var(--rift-glow) 55%, transparent)}
+.rift .size{color:var(--rift)}
+.rift .fill{background:linear-gradient(90deg, var(--rift), var(--rift-glow))}
+.rift .slide{margin:.15rem 0 0; font-size:.8rem; font-style:italic; color:var(--ink-soft); max-width:58ch}
+.gate{position:relative; display:inline-grid; place-items:center; width:var(--g,64px); aspect-ratio:1; margin-top:.5rem}
+.gate svg{position:relative; width:100%; height:100%}
+.gate .vortex{position:absolute; inset:18%; border-radius:50%;
+  background:radial-gradient(circle, var(--rift-glow) 0 12%, transparent 60%), conic-gradient(var(--rift), var(--rift-glow), var(--rift), color-mix(in srgb, var(--rift) 40%, #000), var(--rift))}
+.gate .ring{fill:none; stroke:var(--cable); stroke-width:2.6}
+.gate .chev{fill:var(--line); stroke:rgba(0,0,0,.3); stroke-width:.3}
+.gate .chev.lit{fill:var(--chevron); filter:drop-shadow(0 0 1.5px var(--chevron))}
+.gate-cap{display:block; font:500 .7rem var(--mono); color:var(--ink-soft); margin-top:.2rem}
+.gate-link{display:inline-flex; align-items:center; gap:.3rem; margin-top:.25rem; font:600 .74rem var(--mono); color:var(--rift); text-decoration:none;
+  border:1px dashed var(--rift); border-radius:999px; padding:.05rem .55rem .05rem .2rem}
+.gate-link .gate{--g:18px; margin:0}
+.rift-toggle{font-style:normal; background:none; cursor:pointer; margin:0; line-height:1.35; vertical-align:middle}
+:root[data-rifts="hidden"] :is(.rift, .level .gate-link){display:none}
+.gate-link:hover{background:color-mix(in srgb, var(--rift) 12%, transparent)}
+.gate-link:focus-visible{outline:3px solid var(--rift); outline-offset:2px}
+@media (prefers-reduced-motion: no-preference){
+  .gate .vortex{animation:vortex 7s linear infinite}
+  .rift::after{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:var(--rift-glow); opacity:0; animation:holo 9s steps(1) infinite}
+  .rift{animation:aura 5s ease-in-out infinite}
+  .rift::before{animation:field 5s ease-in-out infinite}
+  @keyframes field{50%{opacity:.75}}
+  @keyframes aura{50%{box-shadow:0 0 0 1px color-mix(in srgb, var(--rift-glow) 65%, transparent), 0 0 30px 8px color-mix(in srgb, var(--rift-glow) 55%, transparent), 0 0 90px 30px color-mix(in srgb, var(--rift) 34%, transparent), 0 0 170px 64px color-mix(in srgb, var(--rift) 16%, transparent)}}
+  @keyframes vortex{to{transform:rotate(1turn)}}
+  @keyframes holo{0%,93%,95%,100%{opacity:0} 94%,96%{opacity:.07}}
+}
 .models{display:grid; gap:.6rem}
 .model .name{font-weight:600}
 .model .lab{color:var(--ink-soft); font-size:.84rem}
@@ -384,7 +426,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 
 @media (max-width:900px){
   .notes{grid-template-columns:repeat(2,1fr)} .notes .row2-a,.notes .row2-b{grid-column:auto}
-  .level{grid-template-columns:90px 1fr; grid-template-areas:"size models" "mem mem" "claude claude"}
+  .level,.rift{grid-template-columns:90px 1fr; grid-template-areas:"size models" "mem mem" "claude claude"}
   .size{grid-area:size} .models{grid-area:models} .mem{grid-area:mem} .claude{grid-area:claude; border-left:0; padding-left:0; border-top:1px solid var(--line); padding-top:.5rem}
   .hero{grid-template-columns:1fr} .dial{justify-self:start}
   .tools{grid-template-columns:1fr}
@@ -393,12 +435,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   .notes{grid-template-columns:1fr}
   .shaft{padding-left:46px} .shaft::before{width:30px} .shaft::after{left:8px; width:14px}
   .car{left:3px; width:24px; height:33px} .cable{left:14px}
-  .level .plate{left:-46px; width:28px; height:28px; font-size:.7rem}
+  .level .plate,.rift .plate{left:-46px; width:28px; height:28px; font-size:.7rem}
   .surface::before{left:0; width:28px; height:28px}
   .stop::before{left:-44px; width:26px}
-  .level{grid-template-columns:1fr; grid-template-areas:"size" "models" "mem" "claude"}
+  .level,.rift{grid-template-columns:1fr; grid-template-areas:"size" "models" "mem" "claude"}
 }
-@media print{.hud{display:none} .level,.box,.stop{break-inside:avoid}}
+@media print{.hud{display:none} .level,.rift,.box,.stop{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -487,6 +529,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       <span class="dev" id="devLegend"></span>
       <span class="aside" data-kind="unified"><b>Why hearts?</b> Unicode has no Mac Studio emoji, so the Studios get hearts shaded like their stops: 🤍 🩶 🖤. At 128GB they take turns with ❤️ Strix Halo and 💚 DGX Spark. Every machine here is loved equally; some just hold more.</span>
       <span class="aside" data-kind="vram"><b>Why a 3090 from 2020?</b> It’s still the home-LLM workhorse: 24GB per card, plentiful on the used market, and far cheaper than the hard-to-find RTX 5090. Stack two or four and you reach floors no single gaming card can.</span>
+      <span class="aside" id="riftAside"><b>What’s the α?</b> Squeezing an ordinary model down to 2 bits usually breaks it, so the floors stop at 4-bit. A few models are <b>trained</b> to run at 2 or 3 bits, though, and hold up far better. They sit off the numbered floors at Stargate-style sites (Alpha, Beta, …), placed by their own memory needs and linked to the original. The 2-bit Nemotron 3.5 Bolt is the first, and it’s worth a try on a 24GB card. <button type="button" class="gate-link rift-toggle" id="riftToggle" aria-pressed="false">Hide 2-bit sites</button></span>
       <span class="aside"><b>Why gems?</b> It’s a mine shaft, so digging deeper ought to turn up something shinier. They run roughly from cheapest to priciest, quartz to red diamond, with one exhibit at the bottom that no mine has produced. They’re decoration only: a gem says nothing about a model, and real gem prices swing too much with quality for the order to be more than loose.</span>
       <span class="aside"><b>That’s… a Chaos Emerald!</b> Sorry, we’re not playing Sonic right now. It’s a plain emerald on B10, and collecting all seven won’t make your GPU go Super.</span>
     </div>
@@ -505,7 +548,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   <div class="box row2-b"><h2>About popularity</h2><p>A rough three-step signal based on OpenRouter token usage and Hugging Face downloads. Big models are judged mostly by API traffic; small ones mostly by downloads.</p></div>
 </section>
 
-<footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.<br>RobCo-ish, N7, and END OF LINE are affectionate nods to Fallout, Mass Effect, and Tron; no affiliation.</footer>
+<footer>Memory figures are approximate and vary by quant format and runtime. Check each model card before you download 400GB of weights.<br>RobCo-ish, N7, END OF LINE, and the Alpha Site’s chevrons are affectionate nods to Fallout, Mass Effect, Tron, and Stargate; no affiliation.</footer>
 </div>
 
 <div class="hud">
@@ -529,7 +572,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
 <!-- Data lives here so it can be lifted into a JSON file for pull requests. -->
 <script id="model-data" type="application/json">
 {
- "updated": "November 11, 2026",
+ "updated": "November 19, 2026",
  "devices": [
   {
    "name": "32GB MacBook Pro",
@@ -609,6 +652,24 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
  "datacenter": [
   {"short": "H100", "vram": 80, "url": "https://en.wikipedia.org/wiki/Hopper_(microarchitecture)"},
   {"short": "B200", "vram": 180, "url": "https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)"}
+ ],
+ "rifts": [
+  {
+   "from": "Nemotron 3.5 Bolt",
+   "name": "Nemotron 3.5 Bolt 24GB",
+   "lab": "NVIDIA",
+   "size": "74B",
+   "kind": "MoE",
+   "bits": 2,
+   "quant": "IQ2",
+   "mem": 21,
+   "memLabel": "~21–22GB",
+   "use": "The B07 Bolt, trained to run at 2 bits (IQ2) instead of squeezed down to them after training. Everyday local agents with vision, on one 24GB card.",
+   "slide": "Slid in from a parallel universe where this model was always 2-bit. Same Bolt, different physics.",
+   "pop": 3,
+   "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF",
+   "claudeNote": "if the 2 bits hold up"
+  }
  ],
  "appsReserveGB": 16,
  "contextReserveGB": 4,
@@ -779,7 +840,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     {
      "name": "Nemotron 3.5 Bolt",
      "lab": "NVIDIA",
-     "use": "Everyday local agents; NVIDIA also ships a 2-bit build that fits a single 24GB card.",
+     "use": "Everyday local agents with vision.",
      "pop": 2,
      "hf": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-BF16"
     }
@@ -1044,13 +1105,13 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   }
   const stopsAfter = {};
   // key = total memory; stops sharing a floor list smallest first (stable sort keeps REC before LAST).
-  const addStop = (i, html, key) => { if (i < 0) return; (stopsAfter[i] = stopsAfter[i] || []).push({html, key}); };
+  const addStop = (i, html, key, limit) => { if (i < 0) return; (stopsAfter[i] = stopsAfter[i] || []).push({html, key, limit}); };
   for (const d of D.devices){
     if (d.laptop){
       const comfy = d.ram - D.appsReserveGB - D.contextReserveGB;
-      addStop(deepestFit(comfy), `<div class="stop rec" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">REC</span><div>Recommended stop for a ${esc(d.name)} <small>Leaves about ${D.appsReserveGB}GB for your apps and ${D.contextReserveGB}GB for context (weights up to ~${comfy}GB).</small></div></div>`, d.ram);
+      addStop(deepestFit(comfy), `<div class="stop rec" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">REC</span><div>Recommended stop for a ${esc(d.name)} <small>Leaves about ${D.appsReserveGB}GB for your apps and ${D.contextReserveGB}GB for context (weights up to ~${comfy}GB).</small></div></div>`, d.ram, comfy);
     }
-    addStop(deepestFit(d.raised), `<div class="stop last" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`, d.ram);
+    addStop(deepestFit(d.raised), `<div class="stop last" data-kind="unified" style="--c:var(--${d.color});--cs:var(--${d.color}s)" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(d.name)} <small>About ${d.usable}GB usable by the GPU by default, around ${d.raised}GB with a raised limit.</small></div></div>`, d.ram, d.raised);
   }
   const COUNTS = [1, 2, 4], COUNT_WORDS = {2:"two", 4:"four", 8:"eight"};
   // showoff: a count too absurd for the picker that still gets a stop and pills.
@@ -1060,7 +1121,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       const vram = g.vram * n, usable = Math.floor(vram * VRAM_USABLE);
       const who = n === 1 ? g.name : `${COUNT_WORDS[n]} ${g.short}s`;
       const note = n === g.showoff ? `${vram}GB of VRAM, about ${usable}GB usable. ${g.showoffNote}` : `${vram}GB of VRAM, about ${usable}GB usable after driver and display overhead.`;
-      addStop(deepestFit(usable), `<div class="stop last" data-kind="vram" style="--c:var(--${g.vendor});--cs:color-mix(in srgb, var(--${g.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for ${esc(who)} <small>${esc(note)}</small></div></div>`, vram);
+      addStop(deepestFit(usable), `<div class="stop last" data-kind="vram" style="--c:var(--${g.vendor});--cs:color-mix(in srgb, var(--${g.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for ${esc(who)} <small>${esc(note)}</small></div></div>`, vram, usable);
     }
   }
   // VRAM-mode pills: the smallest setup that fits; setups with equal room take turns.
@@ -1093,7 +1154,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       : `<span class="rotor words${ties.length === 2 ? " two" : ""}" role="img" aria-label="${esc(ties.map(r => `${r.label} ${r.gb}GB`).join(" or "))}">${ties.map(r => `<span>${one(r)}</span>`).join("")}</span>`};
   }
   for (const m of D.minis){
-    addStop(deepestFit(m.usable), `<div class="stop last" data-kind="unified" style="--c:var(--${m.vendor});--cs:color-mix(in srgb, var(--${m.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(m.name)} <small>${esc(m.note)}</small></div></div>`, m.ram);
+    addStop(deepestFit(m.usable), `<div class="stop last" data-kind="unified" style="--c:var(--${m.vendor});--cs:color-mix(in srgb, var(--${m.vendor}) 16%, var(--paper))" role="note"><span class="chip">LAST</span><div>Last stop for a ${esc(m.name)} <small>${esc(m.note)}</small></div></div>`, m.ram, m.usable);
   }
 
   const ticks = D.devices.map(d => `<span class="tick" data-kind="unified" style="left:${pct(d.ram)}%;background:var(--${d.color})"></span>`).join("")
@@ -1108,12 +1169,52 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
   };
   const signal = n => n ? `<span class="sig" role="img" aria-label="Popularity ${n} of 3">${[1,2,3].map(k => `<b class="${k<=n?"on":""}"></b>`).join("")}</span>` : "";
 
+  // Stargate-style ring: nine chevrons, one lit per bit.
+  const gateSvg = bits => `<span class="gate" aria-hidden="true"><span class="vortex"></span><svg viewBox="-12 -12 24 24"><circle class="ring" r="9.6"/>${
+    [...Array(9)].map((_, k) => `<polygon class="chev${k < bits ? " lit" : ""}" points="-2.1,-12 2.1,-12 0,-8.7" transform="rotate(${k * 40})"/>`).join("")}</svg></span>`;
+  // Off the numbered floors, so they're named like Stargate's off-world bases, in data order (new ones never rename old ones).
+  const GREEK = [["α","Alpha"],["β","Beta"],["γ","Gamma"],["δ","Delta"],["ε","Epsilon"],["ζ","Zeta"],["η","Eta"],["θ","Theta"]];
+  const RIFTS = (D.rifts || []).map((r, k) => ({...r, glyph: GREEK[k][0], plate: `${GREEK[k][1]} Site`, id: `${GREEK[k][1].toLowerCase()}-site`,
+    src: D.levels.findIndex(l => l.models.some(m => m.name === r.from)), at: deepestFit(r.mem)}))
+    .sort((a, b) => a.mem - b.mem);
+  function riftHtml(r){
+    const s = D.levels[r.src] || {}, u = hfUrl(r.hf);
+    const link = u ? `<a class="hf" href="${u}" target="_blank" rel="noopener" aria-label="Open ${esc(r.name)} on Hugging Face">HF</a>` : "";
+    const back = r.src >= 0 ? `<a class="gate-link" href="#${lvl(r.src).toLowerCase()}">${gateSvg(r.bits)}Original on ${lvl(r.src)}</a>` : "";
+    const fits = (k, a) => `<div class="fits" data-kind="${k}"><span class="${a.cls}">Q${r.bits}: ${a.text}</span></div>`;
+    return `<article class="rift" id="${r.id}" aria-label="${esc(r.plate)}: ${esc(r.name)}, ${r.bits}-bit edition">
+      <span class="plate" aria-hidden="true">${r.glyph}</span>
+      <div class="size">${esc(r.size)}<small>${esc(r.plate)}<br>${r.bits}-bit${r.kind ? " " + esc(r.kind) : ""}</small>${gateSvg(r.bits)}<span class="gate-cap">Chevron ${r.bits} locked</span></div>
+      <div class="models"><div class="model"><span class="name">${esc(r.name)}</span>${signal(r.pop)}${link} <span class="lab">${esc(r.lab)}</span><p>${esc(r.use)}</p>${r.slide ? `<p class="slide">${esc(r.slide)}</p>` : ""}${back}</div></div>
+      <div class="mem" aria-label="Memory needs">${bar("q" + r.bits, r.mem, r.memLabel)}${fits("unified", smallest(r.mem))}${fits("vram", smallestRig(r.mem))}</div>
+      ${cheapest("unified", r.mem) + cheapest("vram", r.mem)}
+      <div class="claude"><small>Comparable Claude</small>${esc(r.claude || s.claude || "")}${r.claudeNote ? `<small>${esc(r.claudeNote)}</small>` : ""}<small class="next">Comparable ChatGPT</small>${esc(r.chatgpt || s.chatgpt || "")}</div>
+    </article>`;
+  }
+
+  // Rifts show by default; hiding them is a per-viewer preference.
+  const riftToggle = $("riftToggle"), RIFT_KEY = "elevator.hideRifts";
+  function setRifts(hide){
+    document.documentElement.dataset.rifts = hide ? "hidden" : "";
+    riftToggle.setAttribute("aria-pressed", hide ? "true" : "false");
+    riftToggle.innerHTML = gateSvg(hide ? 0 : 2) + (hide ? "Show 2-bit sites" : "Hide 2-bit sites");
+  }
+  if (!RIFTS.length) $("riftAside").hidden = true;
+  let hideRifts = false;
+  try { hideRifts = localStorage.getItem(RIFT_KEY) === "1"; } catch {}
+  setRifts(hideRifts);
+  riftToggle.addEventListener("click", () => {
+    hideRifts = !hideRifts; setRifts(hideRifts);
+    try { localStorage.setItem(RIFT_KEY, hideRifts ? "1" : "0"); } catch {}
+  });
+
   let html = `<div class="strata" aria-hidden="true"><i class="aquifer"></i><i class="layers"></i><i class="cracks"></i><i class="magma"></i></div><div class="hq" aria-hidden="true"><i class="hq-mast"></i><span class="hq-sign">RobCo-ish</span><span class="hq-room hq-lobby"><i class="hq-desk">LLM</i><i class="hq-plant">🪴</i></span><span class="hq-room hq-office"><i class="o-stand"></i><i class="o-cello">🎻</i><i class="o-desk"></i><i class="o-mug">☕</i><i class="o-screen">END OF<br>LINE</i><i class="o-cat">🐈</i><i class="o-chair">🪑</i><i class="o-poster">N7</i></span><i class="hq-tube"><b></b><i></i></i><i class="hq-note">BRB<br>→ B14</i><i class="hq-tube-label">(Fancy Pneumatic<br>Transport)</i></div><div class="surface"><span>Ground level:<br>the lobby</span></div>`;
   D.levels.forEach((l, i) => {
     const models = l.models.map(m => {
       const u = hfUrl(m.hf);
       const link = u ? `<a class="hf" href="${u}" target="_blank" rel="noopener" aria-label="Open ${esc(m.name)} on Hugging Face">HF</a>` : "";
-      return `<div class="model"><span class="name">${esc(m.name)}</span>${signal(m.pop)}${link}${m.lab ? ` <span class="lab">${esc(m.lab)}</span>` : ""}<p>${esc(m.use)}</p></div>`;
+      const gates = RIFTS.filter(r => r.from === m.name).map(r => `<a class="gate-link" href="#${r.id}">${gateSvg(r.bits)}${r.bits}-bit edition at the ${esc(r.plate)}</a>`).join(" ");
+      return `<div class="model"><span class="name">${esc(m.name)}</span>${signal(m.pop)}${link}${m.lab ? ` <span class="lab">${esc(m.lab)}</span>` : ""}<p>${esc(m.use)}</p>${gates}</div>`;
     }).join("");
     let mem;
     if (l.restricted){
@@ -1131,7 +1232,12 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
       ${l.restricted ? `<div class="cheap">Cheapest option: <b>Found your own frontier LLM company</b> · <span class="usd">$10B (Y Combinator?)</span> and a nuclear plant ☢️ or solar farm ☀️</div>` : cheapest("unified", l.q4) + cheapest("vram", l.q4)}
       <div class="claude"><small>Comparable Claude</small>${esc(l.claude)}${l.claudeNote ? `<small>${esc(l.claudeNote)}</small>` : ""}<small class="next">Comparable ChatGPT</small>${esc(l.chatgpt)}${l.chatgptTip ? `<span class="star" tabindex="0" aria-label="Note">*<span class="star-tip" role="tooltip">${esc(l.chatgptTip)}</span></span>` : ""}${l.chatgptNote ? `<small>${esc(l.chatgptNote)}</small>` : ""}</div>
     </article>`;
-    if (stopsAfter[i]) html += stopsAfter[i].sort((a, b) => a.key - b.key).map(st => st.html).join("");
+    const rifts = RIFTS.filter(r => r.at === i);
+    for (const st of (stopsAfter[i] || []).sort((a, b) => a.key - b.key)){
+      while (rifts.length && rifts[0].mem <= st.limit) html += riftHtml(rifts.shift());
+      html += st.html;
+    }
+    html += rifts.map(riftHtml).join("");
     html += `<div class="you-slot" data-after="${i}"></div>`;
   });
   $("shaft").innerHTML = html;
@@ -1229,7 +1335,7 @@ footer{margin-top:2rem; font-size:.84rem; color:var(--ink-soft); text-align:cent
     let past = false;
     for (const el of $("shaft").children){
       if (el === slot) past = true;
-      else if (el.matches(".level, .stop")) el.classList.toggle("beyond", past);
+      else if (el.matches(".level, .stop, .rift")) el.classList.toggle("beyond", past);
     }
     // The car and indicator are wired up further down; wait a frame so they exist and the new stop has laid out.
     requestAnimationFrame(() => { onMove(); updateIndicator(); });

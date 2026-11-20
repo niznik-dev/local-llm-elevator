@@ -46,6 +46,7 @@ count). Hover it for where the number comes from.
 | **Comparable Claude model** | The Claude tier you'd reach for on the same kind of task (not a claim of equal performance) |
 | **Comparable ChatGPT model** | The same idea for OpenAI's API tiers (GPT-6 Luna, GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Astra) |
 | **Popularity** | A rough three-step signal from OpenRouter token usage and Hugging Face downloads |
+| **Alpha Site (rifts)** | Off the numbered floors, like Stargate's off-world bases. A model built to run at 2 or 3 bits (trained that way, not squeezed down after training) is a hologram of its original, placed by its own memory footprint. Its gate lights one chevron per bit and links back to the original floor. Shown by default; **Hide 2-bit sites** in *Reading the shaft* hides them (remembered per browser) |
 | **Gem** | Decoration. It's a mine shaft, so gems get roughly pricier the deeper you go (quartz to red diamond, then antimatter). They say nothing about the model |
 
 Reference stops are shown for 32GB and 64GB MacBook Pros (💻) and 128 / 256 / 512GB Mac Studios (🤍 🩶 🖤), plus 128GB Strix Halo (❤️) and DGX Spark (💚) mini PCs, which take turns with the 128GB Studio in the fit pills. In VRAM mode those stops swap out for one per GPU preset, plus a stop for every multi-card count the selector allows (2× RX 9070 XT; 2× and 4× RTX 3090 and 5090), and one 8× RTX 5090 🔥 stop that's deliberately left out of the picker. A
@@ -86,6 +87,7 @@ All model and device data lives in a JSON block inside `index.html`:
 | `"gpus"` | VRAM presets: `vendor` (`nvidia` or `amd`) for the dot and shirt color, `price` per card, `max` cards (with a `why` tooltip for greyed-out counts), `rigStops`, and an optional `showoff` count |
 | `"hosts"` | Rough cost of the machine around 1, 2, 4, or 8 GPUs (PC, workstation, server) |
 | `"datacenter"` | Cards for the 🏢 line, with a `url` for each name's link |
+| `"rifts"` | Lower-bit editions of a model on a deeper floor (e.g. NVIDIA's 2-bit Bolt): `from` (the original model's `name`), `bits`, `mem` / `memLabel`, `use`, `slide`, `hf`. Each one appears as a hologram card at the depth its memory reaches, named Alpha Site, Beta Site, … in data order (append new ones; don't reorder) |
 
 To add a model, append it to the matching level's `models` array; to change the memory budget
 assumptions, edit `appsReserveGB` and `contextReserveGB`. Prices are US prices as of November 2026
